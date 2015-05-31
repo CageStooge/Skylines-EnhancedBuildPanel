@@ -12,7 +12,7 @@ namespace EnhancedBuildPanel
 
         public const bool Enabled = false;
 
-        private const string Prefix = "<Enhanced Build Panel> - ";
+        private static string Prefix = "<Enhanced Build Panel " + Mod.myVersion + "> : ";
 
         public static void Log(string str)
         {

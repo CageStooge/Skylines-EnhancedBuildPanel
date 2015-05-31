@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace EnhancedBuildPanel
 {
-
     public class Mod : IUserMod
     {
 
@@ -21,7 +20,12 @@ namespace EnhancedBuildPanel
             get { return "Enhanced In Game Asset Panel"; }
         }
 
+        public static string myVersion = "1.0.2";
+        
     }
+
+
+        
 
     public class ModLoad : LoadingExtensionBase
     {
@@ -42,4 +46,4 @@ namespace EnhancedBuildPanel
         }
     }
 
-}
+ }
