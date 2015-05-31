@@ -8,11 +8,18 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
+# Directories
+Debug/
+Bin/
+
 # Windows Installer files
 *.cab
 *.msi
 *.msm
 *.msp
+
+# PreCompiled Dlls
+*.dll
 
 # Windows shortcuts
 *.lnk
