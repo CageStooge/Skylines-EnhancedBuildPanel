@@ -1,17 +1,48 @@
-﻿using ColossalFramework.Plugins;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using ColossalFramework.Plugins;
 using UE = UnityEngine;
 
 namespace EnhancedBuildPanel
 {
     public class Debug
     {
-        public static void Log(string LogInput)
+
+        public const bool Enabled = false;
+
+        private static string Prefix = "<Enhanced Build Panel " + Mod.myVersion + "> : ";
+
+        public static void Log(string str)
         {
-            string AppVersion = "<Enhanced Build Panel v 1.0.2> : ";
-            string LogDateTime = System.DateTime.Now.ToString("G");
-            string LogOutput = AppVersion + LogDateTime + LogInput;
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, LogOutput);
-            UE.Debug.Log(LogOutput);
+            string logTime = Debug.LogTime();
+            var message = string.Format("{0} {1} {2}", Prefix, logTime, str);
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, message);
+            UE.Debug.Log(message);
         }
+
+        public static void LogWarning(string str)
+        {
+            string logTime = Debug.LogTime();
+            var message = string.Format("{0} {1} {2}", Prefix, logTime, str);
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Warning, message);
+            UE.Debug.LogWarning(message);
+        }
+
+        public static void LogError(string str)
+        {
+            string logTime = Debug.LogTime();
+            var message = string.Format("{0} {1} {2}", Prefix, logTime, str);
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, message);
+            UE.Debug.LogError(message);
+        }
+
+        private static string LogTime()
+        {
+            string str = System.DateTime.Now.ToString("G");
+            return str;
+        }
+
     }
 }
