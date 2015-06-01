@@ -30,7 +30,7 @@ namespace EnhancedBuildPanel
 
         public override void OnLevelLoaded(LoadMode mode)
         {
-            Debug.Log("Now Monitoring Panels ... ");
+            Debug.Log("v1.2 - Now Monitoring Panels ... ");
             var uiView = GameObject.FindObjectOfType<UIView>();
             improvedBuildPanel = uiView.gameObject.AddComponent<ImprovedBuildPanel>();
         }
@@ -39,6 +39,15 @@ namespace EnhancedBuildPanel
         {
             Debug.Log("Monitoring shutting down ... ");
             GameObject.Destroy(improvedBuildPanel);
+            GameObject.DestroyObject(improvedBuildPanel);
+            if (improvedBuildPanel == null)
+            {
+                Debug.Log("improvedBuildPanel was destroyed");
+            }
+            else
+            {
+                Debug.Log("improvedBuildPanel was NOT destoryed");
+            }
         }
     }
 
