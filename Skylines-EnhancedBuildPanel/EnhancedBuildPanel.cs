@@ -6,10 +6,10 @@ namespace EnhancedBuildPanel
 {
 
 
-    public class ImprovedBuildPanel : MonoBehaviour
+    public class EnhancedBuildPanel : MonoBehaviour
     {
 
-        private static readonly string configPath = "ImprovedBuildPanelConfig.xml";
+        private static readonly string configPath = "EnhancedBuildPanel.xml";
         private Configuration config;
 
         // Attempt to read the XML file to determine the last settings of the window
@@ -17,8 +17,13 @@ namespace EnhancedBuildPanel
         private void LoadConfig()
         {
             config = Configuration.Deserialize(configPath);
-            if (config == null)
+
+            // We'll check to make sure all the variable's were set, and that the mouse scroll wheel speed has a value of at least 1. 
+            // This means, that in conjunction with the force refresh, a user should be able to change scroll speed without having to 
+            // restart the game.
+            if (config.panelPosition == null | config.panelSize == null || config.mouseScrollSpeed <= 0) 
             {
+                Debug.Log("No configuration file detected. Creating a fresh one");
                 config = new Configuration();
                 SaveConfig();
             }
@@ -78,6 +83,7 @@ namespace EnhancedBuildPanel
                 config.panelPosition = tabContainer.relativePosition;
                 config.panelSize = tabContainer.size;
                 config.panelPositionSet = true;
+                config.mouseScrollSpeed = 128.0f;
                 Debug.Log(string.Format("Panel reset to position {0} and size {1}", config.panelPosition, config.panelSize));
             }
 
@@ -228,7 +234,7 @@ namespace EnhancedBuildPanel
 
                 scrollablePanel.eventMouseWheel += (component, param) =>
                 {
-                    scrollablePanel.scrollPosition = new Vector2(0.0f, scrollablePanel.scrollPosition.y + -param.wheelDelta * 64.0f);
+                    scrollablePanel.scrollPosition = new Vector2(0.0f, scrollablePanel.scrollPosition.y + -param.wheelDelta * config.mouseScrollSpeed);
                 };
 
                 scrollBar.eventValueChanged += delegate(UIComponent component, float value)
@@ -285,7 +291,6 @@ namespace EnhancedBuildPanel
                 Debug.Log(string.Format("An exception occured when building Asset list : {0}", ex));
             }
             
-            
         }
 
         private UIPanel openPanel = null;
@@ -315,10 +320,12 @@ namespace EnhancedBuildPanel
 
                 if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.P)) // Let's the user force a refresh in case the panel gets stuck somehow.
                 {
-                    // ******** This probably will require me to hard code some type of "safe" area for the window to be placed into.
+                    //  Reset panel size to 600 wid x 110 tall, and moves it back to the original anchor point position.
                     Debug.Log("User requested a forced refresh");
-                    config.panelPositionSet = false;
-                    UpdatePanel(openPanel);
+                    config.panelSize = new Vector2(600.0f, 110f);
+                    config.panelPosition = new Vector2(0.0f,0.0f);
+                    SaveConfig();
+                    openPanel = null;
                 }
 
                 if (openPanel != null)
