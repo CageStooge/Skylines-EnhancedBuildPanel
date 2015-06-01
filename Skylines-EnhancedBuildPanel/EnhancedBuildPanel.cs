@@ -5,17 +5,25 @@ using UnityEngine;
 namespace EnhancedBuildPanel
 {
 
-    public class ImprovedBuildPanel : MonoBehaviour
+
+    public class EnhancedBuildPanel : MonoBehaviour
     {
 
-        private static readonly string configPath = "ImprovedBuildPanelConfig.xml";
+        private static readonly string configPath = "EnhancedBuildPanel.xml";
         private Configuration config;
 
+        // Attempt to read the XML file to determine the last settings of the window
+        // If no file is found, then load the default settings and use those.
         private void LoadConfig()
         {
             config = Configuration.Deserialize(configPath);
-            if (config == null)
+
+            // We'll check to make sure all the variable's were set, and that the mouse scroll wheel speed has a value of at least 1. 
+            // This means, that in conjunction with the force refresh, a user should be able to change scroll speed without having to 
+            // restart the game.
+            if (config.panelPosition == null | config.panelSize == null || config.mouseScrollSpeed <= 0) 
             {
+                Debug.Log("No configuration file detected. Creating a fresh one");
                 config = new Configuration();
                 SaveConfig();
             }
@@ -25,7 +33,7 @@ namespace EnhancedBuildPanel
         {
             Configuration.Serialize(configPath, config);
         }
-
+        
         private bool resizing = false;
         private Vector2 resizeHandle = Vector2.zero;
         private bool moving = false;
@@ -71,9 +79,12 @@ namespace EnhancedBuildPanel
             var tabContainer = panel.gameObject.transform.parent.GetComponent<UITabContainer>();
             if (!config.panelPositionSet)
             {
+                Debug.Log("Resetting panel to new size");
                 config.panelPosition = tabContainer.relativePosition;
                 config.panelSize = tabContainer.size;
                 config.panelPositionSet = true;
+                config.mouseScrollSpeed = 128.0f;
+                Debug.Log(string.Format("Panel reset to position {0} and size {1}", config.panelPosition, config.panelSize));
             }
 
             var scrollablePanel = panel.Find<UIScrollablePanel>("ScrollablePanel");
@@ -112,6 +123,9 @@ namespace EnhancedBuildPanel
             }
 
             var scrollBar = panel.Find<UIScrollbar>("Scrollbar");
+            try
+            {
+                
             scrollBar.autoHide = false;
             scrollBar.size = new Vector2(20.0f, tabContainer.size.y - 26.0f);
             scrollBar.orientation = UIOrientation.Vertical;
@@ -120,42 +134,45 @@ namespace EnhancedBuildPanel
             scrollBar.enabled = true;
             scrollBar.relativePosition = new Vector3(tabContainer.size.x - 20.0f - 2.0f, 0.0f, 0);
             scrollBar.incrementAmount = 10;
-
-            try
-            {
                 scrollBar.Find<UIButton>("ArrowLeft").isVisible = false;
                 scrollBar.Find<UIButton>("ArrowRight").isVisible = false;
             }
             catch (Exception ex)
             {
-                Debug.Log(String.Format("Exception: {0}", ex));
-
+                Debug.Log(String.Format("Exception occured during Scrollbar setup : ", ex));
             }
 
             var trackSprite = scrollBar.Find<UISlicedSprite>("Track");
             UISlicedSprite thumbSprite = null;
 
-            if (trackSprite == null)
+            try
             {
-                trackSprite = scrollBar.AddUIComponent<UISlicedSprite>();
-                trackSprite.name = "Track";
-                trackSprite.relativePosition = Vector2.zero;
-                trackSprite.autoSize = true;
-                trackSprite.fillDirection = UIFillDirection.Horizontal;
-                trackSprite.spriteName = "ScrollbarTrack";
-                scrollBar.trackObject = trackSprite;
+                if (trackSprite == null)
+                {
+                    trackSprite = scrollBar.AddUIComponent<UISlicedSprite>();
+                    trackSprite.name = "Track";
+                    trackSprite.relativePosition = Vector2.zero;
+                    trackSprite.autoSize = true;
+                    trackSprite.fillDirection = UIFillDirection.Horizontal;
+                    trackSprite.spriteName = "ScrollbarTrack";
+                    scrollBar.trackObject = trackSprite;
 
-                thumbSprite = trackSprite.AddUIComponent<UISlicedSprite>();
-                thumbSprite.name = "Thumb";
-                thumbSprite.relativePosition = Vector2.zero;
-                thumbSprite.fillDirection = UIFillDirection.Horizontal;
-                thumbSprite.autoSize = true;
-                thumbSprite.spriteName = "ScrollbarThumb";
-                scrollBar.thumbObject = thumbSprite;
+                    thumbSprite = trackSprite.AddUIComponent<UISlicedSprite>();
+                    thumbSprite.name = "Thumb";
+                    thumbSprite.relativePosition = Vector2.zero;
+                    thumbSprite.fillDirection = UIFillDirection.Horizontal;
+                    thumbSprite.autoSize = true;
+                    thumbSprite.spriteName = "ScrollbarThumb";
+                    scrollBar.thumbObject = thumbSprite;
+                }
+                else
+                {
+                    thumbSprite = trackSprite.Find<UISlicedSprite>("Thumb");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                thumbSprite = trackSprite.Find<UISlicedSprite>("Thumb");
+                Debug.Log(string.Format("An exception occured while creating scroll bar : {0}", ex));
             }
 
             trackSprite.size = scrollBar.size;
@@ -164,35 +181,42 @@ namespace EnhancedBuildPanel
             var resizeButton = scrollBar.Find<UIButton>("ResizeButton");
             if (resizeButton == null)
             {
-                resizeButton = scrollBar.AddUIComponent<UIButton>();
-                resizeButton.name = "ResizeButton";
-                resizeButton.size = new Vector2(24.0f, 24.0f);
-                resizeButton.AlignTo(scrollBar, UIAlignAnchor.TopLeft);
-                resizeButton.normalFgSprite = "buttonresize";
-                resizeButton.focusedFgSprite = "buttonresize";
-                resizeButton.hoveredFgSprite = "buttonresize";
-                resizeButton.pressedFgSprite = "buttonresize";
-                resizeButton.disabledFgSprite = "buttonresize";
-
-                resizeButton.eventMouseHover += (component, param) =>
+                try
                 {
-                    resizeButton.color = Color.grey;
-                };
+                    resizeButton = scrollBar.AddUIComponent<UIButton>();
+                    resizeButton.name = "ResizeButton";
+                    resizeButton.size = new Vector2(24.0f, 24.0f);
+                    resizeButton.AlignTo(scrollBar, UIAlignAnchor.TopLeft);
+                    resizeButton.normalFgSprite = "buttonresize";
+                    resizeButton.focusedFgSprite = "buttonresize";
+                    resizeButton.hoveredFgSprite = "buttonresize";
+                    resizeButton.pressedFgSprite = "buttonresize";
+                    resizeButton.disabledFgSprite = "buttonresize";
 
-                resizeButton.eventMouseDown += (component, param) =>
-                {
-                    resizeButton.color = Color.black;
-                    resizing = true;
-                    resizeHandle = Input.mousePosition;
-                };
+                    resizeButton.eventMouseHover += (component, param) =>
+                    {
+                        resizeButton.color = Color.grey;
+                    };
 
-                resizeButton.eventMouseUp += (component, param) =>
+                    resizeButton.eventMouseDown += (component, param) =>
+                    {
+                        resizeButton.color = Color.black;
+                        resizing = true;
+                        resizeHandle = Input.mousePosition;
+                    };
+
+                    resizeButton.eventMouseUp += (component, param) =>
+                    {
+                        resizeButton.color = Color.white;
+                        resizing = false;
+                        resizeHandle = Vector2.zero;
+                        SaveConfig();
+                    };
+                }
+                catch (Exception ex)
                 {
-                    resizeButton.color = Color.white;
-                    resizing = false;
-                    resizeHandle = Vector2.zero;
-                    SaveConfig();
-                };
+                    Debug.Log(string.Format("An exception occured when creating resize button : {0}", ex));
+                }
             }
 
             resizeButton.relativePosition = new Vector3(0.0f, scrollBar.size.y, 0.0f);
@@ -203,14 +227,14 @@ namespace EnhancedBuildPanel
                 scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
                 scrollablePanel.horizontalScrollbar = null;
                 scrollablePanel.verticalScrollbar = scrollBar;
-                scrollablePanel.scrollWheelAmount = 32;
+                scrollablePanel.scrollWheelAmount = 64;
                 scrollablePanel.autoLayout = false;
                 scrollablePanel.autoSize = false;
                 scrollablePanel.relativePosition = new Vector3(2.0f, 2.0f, 0.0f);
 
                 scrollablePanel.eventMouseWheel += (component, param) =>
                 {
-                    scrollablePanel.scrollPosition = new Vector2(0.0f, scrollablePanel.scrollPosition.y + -param.wheelDelta * 32.0f);
+                    scrollablePanel.scrollPosition = new Vector2(0.0f, scrollablePanel.scrollPosition.y + -param.wheelDelta * config.mouseScrollSpeed);
                 };
 
                 scrollBar.eventValueChanged += delegate(UIComponent component, float value)
@@ -247,18 +271,26 @@ namespace EnhancedBuildPanel
             float width = scrollablePanel.transform.GetChild(0).GetComponent<UIButton>().size.x;
             float height = scrollablePanel.transform.GetChild(0).GetComponent<UIButton>().size.y;
 
-            for (int i = 0; i < scrollablePanel.transform.childCount; i++)
+            try
             {
-                var child = scrollablePanel.transform.GetChild(i).GetComponent<UIButton>();
-                child.relativePosition = new Vector3(x, y, 0.0f);
-                x += width;
-
-                if (x >= scrollablePanel.width - width)
+                for (int i = 0; i < scrollablePanel.transform.childCount; i++)
                 {
-                    x = 0.0f;
-                    y += height;
+                    var child = scrollablePanel.transform.GetChild(i).GetComponent<UIButton>();
+                    child.relativePosition = new Vector3(x, y, 0.0f);
+                    x += width;
+
+                    if (x >= scrollablePanel.width - width)
+                    {
+                        x = 0.0f;
+                        y += height;
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                Debug.Log(string.Format("An exception occured when building Asset list : {0}", ex));
+            }
+            
         }
 
         private UIPanel openPanel = null;
@@ -285,6 +317,17 @@ namespace EnhancedBuildPanel
         {
             try
             {
+
+                if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.P)) // Let's the user force a refresh in case the panel gets stuck somehow.
+                {
+                    //  Reset panel size to 600 wid x 110 tall, and moves it back to the original anchor point position.
+                    Debug.Log("User requested a forced refresh");
+                    config.panelSize = new Vector2(600.0f, 110f);
+                    config.panelPosition = new Vector2(0.0f,0.0f);
+                    SaveConfig();
+                    openPanel = null;
+                }
+
                 if (openPanel != null)
                 {
                     if (!openPanel.isVisible)
