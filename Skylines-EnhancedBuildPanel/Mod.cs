@@ -4,8 +4,10 @@ using UnityEngine;
 
 namespace EnhancedBuildPanel
 {
+
     public class Mod : IUserMod
     {
+
         public string Name
         {
             get
@@ -18,23 +20,26 @@ namespace EnhancedBuildPanel
         {
             get { return "Enhanced In Game Asset Panel"; }
         }
+
     }
 
     public class ModLoad : LoadingExtensionBase
     {
-        private EnhancedBuildPanel enhancedBuildPanel;
+
+        private ImprovedBuildPanel improvedBuildPanel;
 
         public override void OnLevelLoaded(LoadMode mode)
         {
             Debug.Log("Now Monitoring Panels ... ");
             var uiView = GameObject.FindObjectOfType<UIView>();
-            enhancedBuildPanel = uiView.gameObject.AddComponent<EnhancedBuildPanel>();
+            improvedBuildPanel = uiView.gameObject.AddComponent<ImprovedBuildPanel>();
         }
 
         public override void OnLevelUnloading()
         {
             Debug.Log("Monitoring shutting down ... ");
-            GameObject.Destroy(enhancedBuildPanel   );
+            GameObject.Destroy(improvedBuildPanel);
         }
     }
- }
+
+}
