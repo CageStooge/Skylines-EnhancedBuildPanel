@@ -10,6 +10,7 @@ namespace EnhancedBuildPanel
 
         public Vector2 panelPosition;
         public Vector2 panelSize;
+        public int scrollSpeed;
         public bool panelPositionSet = false;
 
         public void OnPreSerialize()
