@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using ColossalFramework.Plugins;
@@ -44,5 +45,16 @@ namespace EnhancedBuildPanel
             return str;
         }
 
+        public static void dumpObject(object myObject)
+        {
+            string myObjectDetails = "";
+            foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(myObject))
+            {
+                string name = descriptor.Name;
+                object value = descriptor.GetValue(myObject);
+                myObjectDetails += name + ": " + value + "\n";
+            }
+            Debug.Log(myObjectDetails);
+        }
     }
 }
