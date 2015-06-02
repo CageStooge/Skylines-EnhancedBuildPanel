@@ -8,7 +8,7 @@ namespace EnhancedBuildPanel
     public class ImprovedBuildPanel : MonoBehaviour
     {
 
-        private static readonly string configPath = "ImprovedBuildPanelConfig.xml";
+        private static readonly string configPath = "EnhacnedBuildPanelConfig.xml";
         private Configuration config;
 
         private void LoadConfig()
@@ -119,7 +119,14 @@ namespace EnhancedBuildPanel
             scrollBar.isVisible = true;
             scrollBar.enabled = true;
             scrollBar.relativePosition = new Vector3(tabContainer.size.x - 20.0f - 2.0f, 0.0f, 0);
-            scrollBar.incrementAmount = 10;
+
+            // ******* This is what determines the scrolling speed. We will set this in the XML file, but in case it's not //
+            // ******* there, we will set it to a default.
+            if (config.scrollSpeed <= 10)
+            {
+                config.scrollSpeed = 160;
+             }
+            scrollBar.incrementAmount = config.scrollSpeed;
 
             try
             {
@@ -144,7 +151,6 @@ namespace EnhancedBuildPanel
                 trackSprite.fillDirection = UIFillDirection.Horizontal;
                 trackSprite.spriteName = "ScrollbarTrack";
                 scrollBar.trackObject = trackSprite;
-
                 thumbSprite = trackSprite.AddUIComponent<UISlicedSprite>();
                 thumbSprite.name = "Thumb";
                 thumbSprite.relativePosition = Vector2.zero;
