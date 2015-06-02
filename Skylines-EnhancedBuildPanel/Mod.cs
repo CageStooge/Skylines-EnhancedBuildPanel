@@ -40,7 +40,7 @@ namespace EnhancedBuildPanel
                 GameObject.DestroyObject(oldPanel);
             }
             improvedBuildPanel = uiView.gameObject.AddComponent<ImprovedBuildPanel>();
-            Debug.Log("v1.3 Now monitoring panels");
+            Debug.Log("v1.3.1 Now monitoring panels");
         }
 
         public override void OnLevelUnloading()
