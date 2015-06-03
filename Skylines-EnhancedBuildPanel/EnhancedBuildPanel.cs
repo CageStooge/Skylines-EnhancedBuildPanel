@@ -40,7 +40,7 @@ namespace EnhancedBuildPanel
 			"RoadsLargePanel",
 			"RoadsHighwayPanel",
 			"RoadsIntersectionPanel",
-            "Some RoadsPanel",
+            //"Some RoadsPanel",
 			//"ZoningDefaultPanel",
 			//"DistrictDefaultPanel",
 			"ElectricityDefaultPanel",
