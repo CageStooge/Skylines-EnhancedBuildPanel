@@ -1,63 +1,106 @@
-﻿using ColossalFramework.UI;
-using ICities;
+﻿using System;
 using UnityEngine;
+using ICities;
+using ColossalFramework.UI;
 
 namespace EnhancedBuildPanel
 {
-
     public class Mod : IUserMod
     {
-
-        public string Name
-        {
-            get
-            {
-                return "Enhanced Build Panel";
-            }
-        }
-
-        public string Description
-        {
-            get { return "Enhanced In Game Asset Panel"; }
-        }
-
+        public string Name { get { return "Enhanced Build Panel"; } }
+        public string Description { get { return "Enhanced In Game Asset Panel"; } }
     }
 
-    public class ModLoad : LoadingExtensionBase
+    public class LoadingExtension : LoadingExtensionBase
     {
-
-        private ImprovedBuildPanel improvedBuildPanel;
-
         public override void OnLevelLoaded(LoadMode mode)
         {
-
-            Debug.Log("v1.2.0 - Defining Panel ... ");
-            var uiView = GameObject.FindObjectOfType<UIView>();
-            var oldPanel = uiView.gameObject.GetComponent<ImprovedBuildPanel>();
-            if (oldPanel)
-            {
-                Debug.Log(string.Format("ImprovedBuildPanel is detected at game load, destroying old paenl", oldPanel));
-                GameObject.DestroyObject(oldPanel);
-            }
-            improvedBuildPanel = uiView.gameObject.AddComponent<ImprovedBuildPanel>();
-            Debug.Log("v1.3.1 Now monitoring panels");
+            base.OnLevelLoaded(mode);
+            ThreadingExtension.instance.OnLevelLoad();
         }
-
         public override void OnLevelUnloading()
         {
-            Debug.Log("Monitoring shutting down ... ");
-            Debug.Log("Removing Panel");
-            GameObject.Destroy(improvedBuildPanel);
-            GameObject.DestroyObject(improvedBuildPanel);
-            if (improvedBuildPanel == null)
-            {
-                Debug.Log("improvedBuildPanel was destroyed");
-            }
-            else
-            {
-                Debug.Log("improvedBuildPanel was NOT destoryed");
-            }
+            base.OnLevelUnloading();
+            ThreadingExtension.instance.OnLevelUnload();
         }
     }
+    
+    public class ThreadingExtension : ThreadingExtensionBase
+    {
+        public static ThreadingExtension instance;
+        ImprovedBuildPanel improvedBuildPanel;
 
+        public override void OnCreated(IThreading threading)
+        {
+            base.OnCreated(threading);
+            ThreadingExtension.instance = this;
+            this.OnLevelLoad();
+
+        }
+        public override void OnReleased()
+        {
+            base.OnReleased();
+        }
+
+        public void OnLevelLoad()
+        {
+            InitPanel();
+        }
+
+        public void OnLevelUnload()
+        {
+            DestroyPanel(improvedBuildPanel);
+
+        }
+        public override void OnUpdate(float realTimeDelta, float simulationTimeDelta)
+        {
+            //before every recompile, hit ctrl+shift+d to remove the old panel
+            //then recompile / copy the dll, switch to game, hit ctrl+d to spawn the panel
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.M))
+            {
+                if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    DestroyPanel(improvedBuildPanel);
+                }
+                else
+                {
+                    InitPanel();
+                }
+            }
+        }
+
+        void DestroyPanel(Component panel)
+        {
+            if (improvedBuildPanel != null)
+            {
+                Debug.Log("Destroying improvedBuildPanel!");
+
+                GameObject.Destroy(panel);
+            }
+        }
+
+        void InitPanel()
+        {
+            DestroyPanel(improvedBuildPanel);
+
+            //the game caches (UI?) classes, so while developing init your UI here
+            //alternatively use your own class, but rename it before each recompile
+
+            //UIPanel or any UIComponent you want
+
+            //uiView = GameObject.FindObjectOfType<UIView>();
+            Debug.Log("Creating new panel!");
+            improvedBuildPanel = GameObject.FindObjectOfType<UIView>().gameObject.AddComponent<ImprovedBuildPanel>();
+
+            /*
+            panel = UIView.GetAView().AddUIComponent(typeof(UIPanel)) as UIPanel;
+            panel.backgroundSprite = "GenericPanel";
+            panel.color = new Color32(255, 0, 0, 100);
+            panel.width = 100;
+            panel.height = 200;
+             */
+        }
+
+
+    }
 }

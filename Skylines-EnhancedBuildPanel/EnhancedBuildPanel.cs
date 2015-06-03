@@ -40,6 +40,7 @@ namespace EnhancedBuildPanel
 			"RoadsLargePanel",
 			"RoadsHighwayPanel",
 			"RoadsIntersectionPanel",
+            "Some RoadsPanel",
 			//"ZoningDefaultPanel",
 			//"DistrictDefaultPanel",
 			"ElectricityDefaultPanel",
@@ -56,13 +57,14 @@ namespace EnhancedBuildPanel
 			"PublicTransportPlanePanel",
 			"BeautificationParksnPlazasPanel",
 			"BeautificationPathsPanel",
-			"BeautificationPropsPanel"
-			/*"MonumentCategory1Panel",
+			"BeautificationPropsPanel",
+            "MonumentLandmarksPanel",
+			"MonumentCategory1Panel",
             "MonumentCategory2Panel",
             "MonumentCategory3Panel",
             "MonumentCategory4Panel",
             "MonumentCategory5Panel",
-            "MonumentCategory6Panel",*/
+            "MonumentCategory6Panel"
 			//"WondersDefaultPanel"
 		};
 
@@ -223,7 +225,7 @@ namespace EnhancedBuildPanel
                 {
                     scrollablePanel.scrollPosition = new Vector2(0.0f, value);
                 };
-
+                
                 scrollablePanel.eventMouseDown += (component, param) =>
                 {
                     if (Input.GetKey(KeyCode.LeftControl))
@@ -286,8 +288,10 @@ namespace EnhancedBuildPanel
                 }
             }
         }
+        
 
-        void Update()
+
+        void OnGUI()
         {
             try
             {
