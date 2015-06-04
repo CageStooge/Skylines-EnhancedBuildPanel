@@ -69,6 +69,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\UIUtils.cs" />
+    <Compile Include="GUI\UITitleBar.cs" />
+    <Compile Include="GUI\UIPrefabItem.cs" />
+    <Compile Include="GUI\UIMainPanel.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="EnhancedBuildPanel.cs" />
     <Compile Include="Debug.cs" />
