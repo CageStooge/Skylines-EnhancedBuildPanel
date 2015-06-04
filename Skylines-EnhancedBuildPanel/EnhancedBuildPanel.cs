@@ -31,9 +31,9 @@ namespace EnhancedBuildPanel
         private bool moving = false;
         private Vector2 moveHandle = Vector2.zero;
 
-        private UIPanel[] panels;
+        private UIPanel[] _panels;
 
-        private static readonly string[] panelNames = new string[]
+        private static readonly string[] PanelNames = new string[]
 		{
 			"RoadsSmallPanel",
 			"RoadsMediumPanel",
@@ -275,23 +275,37 @@ namespace EnhancedBuildPanel
         {
             LoadConfig();
 
-            panels = new UIPanel[panelNames.Length];
-            for (int i = 0; i < panelNames.Length; i++)
+            _panels = new UIPanel[PanelNames.Length];
+            int p = 0;
+            for (int i = 0; i < PanelNames.Length; i++)
             {
                 try
                 {
-                    panels[i] = GameObject.Find(panelNames[i]).GetComponent<UIPanel>();
+                    Debug.Log(string.Format("Searching for panel {0}", PanelNames[i]));
+                    if (GameObject.Find(PanelNames[i]).GetComponent<UIPanel>() != null)
+                    {
+                        Debug.Log(string.Format("Loading panel {0} into monitoring queue at position {1}", PanelNames[i],
+                            p));
+                        _panels[p] = GameObject.Find(PanelNames[i]).GetComponent<UIPanel>();
+                        p++;
+                    }
+                    else
+                    {
+                        Debug.Log(string.Format("Unable to locate panel {0} in the UI, skipping ...", PanelNames[i]));
+                    }
                 }
+                //  panels[i] = GameObject.Find(panelNames[i]).GetComponent<UIPanel>();
+
                 catch (Exception)
                 {
-                    Debug.Log(String.Format("Couldn't find panel with name {0}", panelNames[i]));
+                    Debug.Log(String.Format("Couldn't find panel with name {0}", PanelNames[i]));
                 }
             }
         }
         
 
 
-        void OnGUI()
+        void Update()
         {
             try
             {
@@ -334,7 +348,7 @@ namespace EnhancedBuildPanel
 
                 if (openPanel == null)
                 {
-                    foreach (var panel in panels)
+                    foreach (var panel in _panels)
                     {
                         if (panel.isVisible)
                         {
