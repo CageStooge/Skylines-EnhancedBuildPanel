@@ -1,4 +1,5 @@
 ﻿using System;
+using ColossalFramework.IO;
 using ColossalFramework.UI;
 using UnityEngine;
 
@@ -8,9 +9,8 @@ namespace EnhancedBuildPanel
     public class ImprovedBuildPanel : MonoBehaviour
     {
 
-        private static readonly string configPath = "EnhacnedBuildPanelConfig.xml";
+        private static readonly string configPath = DataLocation.modsPath + "EnhancedBuildConfig.xml"; // Save to users local mod directory
         private Configuration config;
-
         private void LoadConfig()
         {
             config = Configuration.Deserialize(configPath);
@@ -31,8 +31,8 @@ namespace EnhancedBuildPanel
         private bool moving = false;
         private Vector2 moveHandle = Vector2.zero;
 
+        #region Panel Names
         private UIPanel[] _panels;
-
         private static readonly string[] PanelNames = new string[]
 		{
 			"RoadsSmallPanel",
@@ -40,7 +40,7 @@ namespace EnhancedBuildPanel
 			"RoadsLargePanel",
 			"RoadsHighwayPanel",
 			"RoadsIntersectionPanel",
-            //"Some RoadsPanel",
+            "Some RoadsPanel",
 			//"ZoningDefaultPanel",
 			//"DistrictDefaultPanel",
 			"ElectricityDefaultPanel",
@@ -67,10 +67,29 @@ namespace EnhancedBuildPanel
             "MonumentCategory6Panel"
 			//"WondersDefaultPanel"
 		};
-
+        #endregion
+        #region UpdatePanel
         void UpdatePanel(UIPanel panel)
         {
+            #region TabContainer
             var tabContainer = panel.gameObject.transform.parent.GetComponent<UITabContainer>();
+
+       /*     var dragHandle = tabContainer.Find<UIDragHandle>("DragHandler");
+            if (dragHandle == null)
+            {
+                dragHandle = tabContainer.AddUIComponent<UIDragHandle>();
+                dragHandle.name = "DragHandler";
+                            dragHandle.autoSize = false;
+            dragHandle.size = new Vector2(24.0f, 24.0f);
+            dragHandle.relativePosition = new Vector3(tabContainer.size.x - 24.0f, 24.0f, 0.0f);
+            dragHandle.isInteractive = true;
+            dragHandle.isVisible = true;
+            dragHandle.enabled = true;
+            dragHandle.color = Color.white;
+
+            }
+        */
+
             if (!config.panelPositionSet)
             {
                 config.panelPosition = tabContainer.relativePosition;
@@ -103,7 +122,9 @@ namespace EnhancedBuildPanel
             {
                 tabContainer.absolutePosition = new Vector2(tabContainer.absolutePosition.x, 0.0f);
             }
+            #endregion
 
+            #region ToolStrip
             var groupToolStrip = tabContainer.transform.parent.GetComponent<UIPanel>()
                 .Find<UITabstrip>("GroupToolstrip");
             if (groupToolStrip != null)
@@ -112,7 +133,9 @@ namespace EnhancedBuildPanel
                 groupToolStrip.relativePosition = new Vector3(8.0f, -20.0f, 0.0f);
                 groupToolStrip.zOrder = -9999;
             }
+            #endregion
 
+            #region Scrollbar
             var scrollBar = panel.Find<UIScrollbar>("Scrollbar");
             scrollBar.autoHide = false;
             scrollBar.size = new Vector2(20.0f, tabContainer.size.y - 26.0f);
@@ -120,7 +143,7 @@ namespace EnhancedBuildPanel
             scrollBar.isInteractive = true;
             scrollBar.isVisible = true;
             scrollBar.enabled = true;
-            scrollBar.relativePosition = new Vector3(tabContainer.size.x - 20.0f - 2.0f, 0.0f, 0);
+            scrollBar.relativePosition = new Vector3(tabContainer.size.x - 20.0f,-2.0f,0.0f);
 
             // ******* This is what determines the scrolling speed. We will set this in the XML file, but in case it's not //
             // ******* there, we will set it to a default.
@@ -140,7 +163,9 @@ namespace EnhancedBuildPanel
                 Debug.Log(String.Format("Exception: {0}", ex));
 
             }
+            #endregion
 
+            #region Scrollbar track bar
             var trackSprite = scrollBar.Find<UISlicedSprite>("Track");
             UISlicedSprite thumbSprite = null;
 
@@ -168,7 +193,9 @@ namespace EnhancedBuildPanel
 
             trackSprite.size = scrollBar.size;
             thumbSprite.width = trackSprite.width;
+            #endregion
 
+            #region Resize Button
             var resizeButton = scrollBar.Find<UIButton>("ResizeButton");
             if (resizeButton == null)
             {
@@ -199,12 +226,15 @@ namespace EnhancedBuildPanel
                     resizeButton.color = Color.white;
                     resizing = false;
                     resizeHandle = Vector2.zero;
+                    tabContainer.size = config.panelSize;
                     SaveConfig();
                 };
             }
 
             resizeButton.relativePosition = new Vector3(0.0f, scrollBar.size.y, 0.0f);
+            #endregion
 
+            #region Scrollable Panel
             if (scrollablePanel.name != "ImprovedScrollablePanel")
             {
                 scrollablePanel.name = "ImprovedScrollablePanel";
@@ -243,7 +273,7 @@ namespace EnhancedBuildPanel
                 };
             }
 
-            scrollablePanel.size = new Vector2(tabContainer.size.x - 32.0f, config.panelSize.y - 2.0f);
+            scrollablePanel.size = new Vector2(tabContainer.size.x - 32.0f, tabContainer.size.y - 2.0f);
 
             if (itemCount == 0)
             {
@@ -268,10 +298,27 @@ namespace EnhancedBuildPanel
                 }
             }
         }
+            #endregion
+        #endregion
 
+        private void CreateDragHandle(UITabContainer parent)
+        {
+            var dragHandleObject = new GameObject("DragHandler");
+            dragHandleObject.transform.parent = parent.transform;
+            dragHandleObject.transform.localPosition = Vector3.zero;
+            var dragHandle = dragHandleObject.AddComponent<UIDragHandle>();
+            dragHandle.autoSize = false;
+            dragHandle.width = 24.0f;
+            dragHandle.height = 24.0f;
+            dragHandle.zOrder = 0;
+            dragHandle.BringToFront();
+        }
+
+        #region InitPanels
         private UIPanel openPanel = null;
 
-        void Start()
+   
+        private void initPanels()
         {
             LoadConfig();
 
@@ -294,19 +341,25 @@ namespace EnhancedBuildPanel
                         Debug.Log(string.Format("Unable to locate panel {0} in the UI, skipping ...", PanelNames[i]));
                     }
                 }
-                //  panels[i] = GameObject.Find(panelNames[i]).GetComponent<UIPanel>();
-
                 catch (Exception)
                 {
-                    Debug.Log(String.Format("Couldn't find panel with name {0}", PanelNames[i]));
+                    return; // Just tossing this. I can't figure out the error. So screw it.
                 }
             }
         }
+        #endregion
+        void Start()
+        {
+            initPanels();
+
+        }
         
-
-
         void Update()
         {
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.R) && Input.GetKey(KeyCode.LeftShift))
+            {
+                initPanels();
+            }
             try
             {
                 if (openPanel != null)
@@ -363,12 +416,12 @@ namespace EnhancedBuildPanel
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Debug.Log(String.Format("EXCEPTION: {0}", ex));
-
+                return; // Yes, I tossed the errors. I've spent well over 30 hours total trying to figure out the exception. Now I don't care. Tossing it away.
             }
         }
+
 
     }
 

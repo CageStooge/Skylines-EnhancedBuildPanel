@@ -52,22 +52,6 @@ namespace EnhancedBuildPanel
             DestroyPanel(improvedBuildPanel);
 
         }
-        public override void OnUpdate(float realTimeDelta, float simulationTimeDelta)
-        {
-            //before every recompile, hit ctrl+shift+d to remove the old panel
-            //then recompile / copy the dll, switch to game, hit ctrl+d to spawn the panel
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.M))
-            {
-                if (Input.GetKey(KeyCode.LeftShift))
-                {
-                    DestroyPanel(improvedBuildPanel);
-                }
-                else
-                {
-                    InitPanel();
-                }
-            }
-        }
 
         void DestroyPanel(Component panel)
         {
