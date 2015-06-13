@@ -69,10 +69,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GUI\UIUtils.cs" />
-    <Compile Include="GUI\UITitleBar.cs" />
-    <Compile Include="GUI\UIPrefabItem.cs" />
-    <Compile Include="GUI\UIMainPanel.cs" />
+    <Compile Include="CodeFile1.cs" />
+    <Compile Include="UI\UIFastList.cs" />
+    <Compile Include="UI\UIUtils.cs" />
+    <Compile Include="UI\UITitleBar.cs" />
+    <Compile Include="UI\UIGetAssets.cs" />
+    <Compile Include="UI\UIMainPanel.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="EnhancedBuildPanel.cs" />
     <Compile Include="Debug.cs" />

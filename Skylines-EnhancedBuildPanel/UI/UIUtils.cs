@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
 using ColossalFramework.UI;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
-namespace MeshInfo.GUI
+namespace EnhancedBuildPanel.UI
 {
     public class UIUtils
     {
@@ -11,7 +13,7 @@ namespace MeshInfo.GUI
 
         public static UIButton CreateButton(UIComponent parent)
         {
-            UIButton button = (UIButton)parent.AddUIComponent<UIButton>();
+            UIButton button = parent.AddUIComponent<UIButton>();
 
             button.size = new Vector2(90f, 30f);
             button.textScale = 0.9f;
@@ -25,10 +27,10 @@ namespace MeshInfo.GUI
 
         public static UICheckBox CreateCheckBox(UIComponent parent)
         {
-            UICheckBox checkBox = (UICheckBox)parent.AddUIComponent<UICheckBox>();
+            UICheckBox checkBox = parent.AddUIComponent<UICheckBox>();
 
             checkBox.width = 300f;
-            checkBox.height = 20f;
+            checkBox.height = 20;
             checkBox.clipChildren = true;
 
             UISprite sprite = checkBox.AddUIComponent<UISprite>();
@@ -112,10 +114,10 @@ namespace MeshInfo.GUI
             button.zOrder = 0;
             button.textScale = 0.8f;
 
-            dropDown.eventSizeChanged += new PropertyChangedEventHandler<Vector2>((c, t) =>
+            dropDown.eventSizeChanged += (c, t) =>
             {
                 button.size = t; dropDown.listWidth = (int)t.x;
-            });
+            };
 
             return dropDown;
         }
@@ -125,7 +127,7 @@ namespace MeshInfo.GUI
             //UIColorField colorField = parent.AddUIComponent<UIColorField>();
             // Creating a ColorField from scratch is tricky. Cloning an existing one instead.
             // Probably doesn't work when on main menu screen and such as no ColorField exists.
-            UIColorField colorField = UnityEngine.Object.Instantiate<GameObject>(UnityEngine.Object.FindObjectOfType<UIColorField>().gameObject).GetComponent<UIColorField>();
+            UIColorField colorField = Object.Instantiate(Object.FindObjectOfType<UIColorField>().gameObject).GetComponent<UIColorField>();
             parent.AttachUIComponent(colorField.gameObject);
 
             colorField.size = new Vector2(40f, 26f);
@@ -137,9 +139,16 @@ namespace MeshInfo.GUI
             return colorField;
         }
 
+
         public static void ResizeIcon(UISprite icon, Vector2 maxSize)
         {
-            if (icon.height == 0) return;
+            /* An important note on this first if statement. Don't use (icon.height == 0). Icon.height
+             * is derived from vector2 and that makes it a floating point number. For our purposes if
+             * it's less than 1 it's useless to us, so just avoid the floating point comparison hell and use < 1
+             * or whatever number you feel is too small. In our situation it likely would not matter, 
+             * but bad habits are bad. Read more here:  https://goo.gl/doFQAo
+             */
+            if (Math.Abs(icon.height) < 1) return; 
 
             float ratio = icon.width / icon.height;
 

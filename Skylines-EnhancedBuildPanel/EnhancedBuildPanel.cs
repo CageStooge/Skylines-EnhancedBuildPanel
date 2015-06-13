@@ -8,28 +8,28 @@ namespace EnhancedBuildPanel
     public class ImprovedBuildPanel : MonoBehaviour
     {
 
-        private static readonly string configPath = "EnhacnedBuildPanelConfig.xml";
-        private Configuration config;
+        private static readonly string ConfigPath = "EnhacnedBuildPanelConfig.xml";
+        private Configuration _config;
 
         private void LoadConfig()
         {
-            config = Configuration.Deserialize(configPath);
-            if (config == null)
+            _config = Configuration.Deserialize(ConfigPath);
+            if (_config == null)
             {
-                config = new Configuration();
+                _config = new Configuration();
                 SaveConfig();
             }
         }
 
         private void SaveConfig()
         {
-            Configuration.Serialize(configPath, config);
+            Configuration.Serialize(ConfigPath, _config);
         }
 
-        private bool resizing = false;
-        private Vector2 resizeHandle = Vector2.zero;
-        private bool moving = false;
-        private Vector2 moveHandle = Vector2.zero;
+        private bool _resizing = false;
+        private Vector2 _resizeHandle = Vector2.zero;
+        private bool _moving = false;
+        private Vector2 _moveHandle = Vector2.zero;
 
         private UIPanel[] _panels;
 
@@ -71,18 +71,18 @@ namespace EnhancedBuildPanel
         void UpdatePanel(UIPanel panel)
         {
             var tabContainer = panel.gameObject.transform.parent.GetComponent<UITabContainer>();
-            if (!config.panelPositionSet)
+            if (!_config.PanelPositionSet)
             {
-                config.panelPosition = tabContainer.relativePosition;
-                config.panelSize = tabContainer.size;
-                config.panelPositionSet = true;
+                _config.PanelPosition = tabContainer.relativePosition;
+                _config.PanelSize = tabContainer.size;
+                _config.PanelPositionSet = true;
             }
 
             var scrollablePanel = panel.Find<UIScrollablePanel>("ScrollablePanel");
             var itemCount = scrollablePanel.transform.childCount;
 
-            tabContainer.relativePosition = config.panelPosition;
-            tabContainer.size = config.panelSize;
+            tabContainer.relativePosition = _config.PanelPosition;
+            tabContainer.size = _config.PanelSize;
 
             if (tabContainer.absolutePosition.x + tabContainer.size.x >= Screen.width)
             {
@@ -124,11 +124,11 @@ namespace EnhancedBuildPanel
 
             // ******* This is what determines the scrolling speed. We will set this in the XML file, but in case it's not //
             // ******* there, we will set it to a default.
-            if (config.scrollSpeed <= 10)
+            if (_config.ScrollSpeed <= 10)
             {
-                config.scrollSpeed = 160;
+                _config.ScrollSpeed = 160;
              }
-            scrollBar.incrementAmount = config.scrollSpeed;
+            scrollBar.incrementAmount = _config.ScrollSpeed;
 
             try
             {
@@ -190,15 +190,15 @@ namespace EnhancedBuildPanel
                 resizeButton.eventMouseDown += (component, param) =>
                 {
                     resizeButton.color = Color.black;
-                    resizing = true;
-                    resizeHandle = Input.mousePosition;
+                    _resizing = true;
+                    _resizeHandle = Input.mousePosition;
                 };
 
                 resizeButton.eventMouseUp += (component, param) =>
                 {
                     resizeButton.color = Color.white;
-                    resizing = false;
-                    resizeHandle = Vector2.zero;
+                    _resizing = false;
+                    _resizeHandle = Vector2.zero;
                     SaveConfig();
                 };
             }
@@ -230,20 +230,20 @@ namespace EnhancedBuildPanel
                 {
                     if (Input.GetKey(KeyCode.LeftControl))
                     {
-                        moving = true;
-                        moveHandle = Input.mousePosition;
+                        _moving = true;
+                        _moveHandle = Input.mousePosition;
                     }
                 };
 
                 scrollablePanel.eventMouseUp += (component, param) =>
                 {
-                    moving = false;
-                    moveHandle = Vector2.zero;
+                    _moving = false;
+                    _moveHandle = Vector2.zero;
                     SaveConfig();
                 };
             }
 
-            scrollablePanel.size = new Vector2(tabContainer.size.x - 32.0f, config.panelSize.y - 2.0f);
+            scrollablePanel.size = new Vector2(tabContainer.size.x - 32.0f, _config.PanelSize.y - 2.0f);
 
             if (itemCount == 0)
             {
@@ -269,7 +269,7 @@ namespace EnhancedBuildPanel
             }
         }
 
-        private UIPanel openPanel = null;
+        private UIPanel _openPanel = null;
 
         void Start()
         {
@@ -309,57 +309,57 @@ namespace EnhancedBuildPanel
         {
             try
             {
-                if (openPanel != null)
+                if (_openPanel != null)
                 {
-                    if (!openPanel.isVisible)
+                    if (!_openPanel.isVisible)
                     {
-                        openPanel = null;
+                        _openPanel = null;
                     }
                 }
 
-                if (resizing)
-                {
-                    Vector2 pos = Input.mousePosition;
-                    var delta = pos - resizeHandle;
-                    resizeHandle = pos;
-                    config.panelSize += new Vector2(delta.x, -delta.y);
-
-                    if (config.panelSize.x <= 64.0f)
-                    {
-                        config.panelSize = new Vector2(64.0f, config.panelSize.y);
-                    }
-
-                    if (config.panelSize.y <= 64.0f)
-                    {
-                        config.panelSize = new Vector2(config.panelSize.x, 64.0f);
-                    }
-
-                    openPanel = null;
-                }
-                else if (moving)
+                if (_resizing)
                 {
                     Vector2 pos = Input.mousePosition;
-                    var delta = pos - moveHandle;
-                    moveHandle = pos;
-                    config.panelPosition += new Vector2(delta.x, -delta.y);
+                    var delta = pos - _resizeHandle;
+                    _resizeHandle = pos;
+                    _config.PanelSize += new Vector2(delta.x, -delta.y);
 
-                    openPanel = null;
+                    if (_config.PanelSize.x <= 64.0f)
+                    {
+                        _config.PanelSize = new Vector2(64.0f, _config.PanelSize.y);
+                    }
+
+                    if (_config.PanelSize.y <= 64.0f)
+                    {
+                        _config.PanelSize = new Vector2(_config.PanelSize.x, 64.0f);
+                    }
+
+                    _openPanel = null;
+                }
+                else if (_moving)
+                {
+                    Vector2 pos = Input.mousePosition;
+                    var delta = pos - _moveHandle;
+                    _moveHandle = pos;
+                    _config.PanelPosition += new Vector2(delta.x, -delta.y);
+
+                    _openPanel = null;
                 }
 
-                if (openPanel == null)
+                if (_openPanel == null)
                 {
                     foreach (var panel in _panels)
                     {
                         if (panel.isVisible)
                         {
-                            openPanel = panel;
+                            _openPanel = panel;
                             break;
                         }
                     }
 
-                    if (openPanel != null)
+                    if (_openPanel != null)
                     {
-                        UpdatePanel(openPanel);
+                        UpdatePanel(_openPanel);
                     }
                 }
             }

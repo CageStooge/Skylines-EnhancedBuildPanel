@@ -8,10 +8,10 @@ namespace EnhancedBuildPanel
     public class Configuration
     {
 
-        public Vector2 panelPosition;
-        public Vector2 panelSize;
-        public int scrollSpeed;
-        public bool panelPositionSet = false;
+        public Vector2 PanelPosition;
+        public Vector2 PanelSize;
+        public int ScrollSpeed;
+        public bool PanelPositionSet = false;
 
         public void OnPreSerialize()
         {
