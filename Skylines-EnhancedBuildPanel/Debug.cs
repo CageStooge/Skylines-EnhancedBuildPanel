@@ -6,14 +6,12 @@ namespace EnhancedBuildPanel
 {
     public class Debug
     {
-
         public const bool Enabled = false;
-
         private const string Prefix = "<Enhanced Build Panel> - ";
 
         public static void Log(string str)
         {
-            string logTime = LogTime();
+            var logTime = LogTime();
             var message = string.Format("{0} {1} {2}", Prefix, logTime, str);
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, message);
             UE.Debug.Log(message);
@@ -21,7 +19,7 @@ namespace EnhancedBuildPanel
 
         public static void LogWarning(string str)
         {
-            string logTime = LogTime();
+            var logTime = LogTime();
             var message = string.Format("{0} {1} {2}", Prefix, logTime, str);
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Warning, message);
             UE.Debug.LogWarning(message);
@@ -29,7 +27,7 @@ namespace EnhancedBuildPanel
 
         public static void LogError(string str)
         {
-            string logTime = LogTime();
+            var logTime = LogTime();
             var message = string.Format("{0} {1} {2}", Prefix, logTime, str);
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, message);
             UE.Debug.LogError(message);
@@ -37,9 +35,8 @@ namespace EnhancedBuildPanel
 
         private static string LogTime()
         {
-            string str = DateTime.Now.ToString("G");
+            var str = DateTime.Now.ToString("G");
             return str;
         }
-
     }
 }

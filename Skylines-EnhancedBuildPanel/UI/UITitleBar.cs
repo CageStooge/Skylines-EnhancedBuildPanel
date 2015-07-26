@@ -5,52 +5,49 @@ namespace EnhancedBuildPanel.UI
 {
     public class UITitleBar : UIPanel
     {
-        private UISprite _icon;
-        private UILabel _title;
-        private UIButton _close;
-        private UIDragHandle _drag;
+        private UIDragHandle m_drag;
+        private UISprite m_icon;
+        private UILabel m_title;
 
-        public string IconSprite
+        public string iconSprite
         {
-            get { return _icon.spriteName; }
+            get { return m_icon.spriteName; }
             set
             {
-                if (_icon == null) return;
-                _icon.spriteName = value;
+                if (m_icon == null) return;
+                m_icon.atlas = UIUtils.defaultAtlas;
+                m_icon.spriteName = value;
 
-                if (_icon.spriteInfo != null)
+                if (m_icon.spriteInfo != null)
                 {
-                    _icon.size = _icon.spriteInfo.pixelSize;
-                    UIUtils.ResizeIcon(_icon, new Vector2(32, 32));
-                    _icon.relativePosition = new Vector3(10, 5);
+                    m_icon.size = m_icon.spriteInfo.pixelSize;
+                    UIUtils.ResizeIcon(m_icon, new Vector2(32, 32));
+                    m_icon.relativePosition = new Vector3(10, 5);
                 }
             }
         }
 
-        public UIButton CloseButton
-        {
-            get { return _close; }
-        }
+        public UIButton closeButton { get; private set; }
 
-        public string Title
+        public string title
         {
-            get { return _title.text; }
-            set { _title.text = value; }
+            get { return m_title.text; }
+            set { m_title.text = value; }
         }
 
         public override void Awake()
         {
             base.Awake();
 
-            _icon = AddUIComponent<UISprite>();
-            _title = AddUIComponent<UILabel>();
-            _close = AddUIComponent<UIButton>();
-            _drag = AddUIComponent<UIDragHandle>();
+            m_icon = AddUIComponent<UISprite>();
+            m_title = AddUIComponent<UILabel>();
+            closeButton = AddUIComponent<UIButton>();
+            m_drag = AddUIComponent<UIDragHandle>();
 
             height = 40;
             width = 450;
-            Title = "(None)";
-            IconSprite = "";
+            title = "(None)";
+            iconSprite = "";
         }
 
         public override void Start()
@@ -63,22 +60,23 @@ namespace EnhancedBuildPanel.UI
             canFocus = true;
             isInteractive = true;
 
-            _drag.width = width - 50;
-            _drag.height = height;
-            _drag.relativePosition = Vector3.zero;
-            _drag.target = parent;
+            m_drag.width = width - 50;
+            m_drag.height = height;
+            m_drag.relativePosition = Vector3.zero;
+            m_drag.target = parent;
 
-            _icon.spriteName = IconSprite;
-            _icon.relativePosition = new Vector3(10, 5);
+            m_icon.spriteName = iconSprite;
+            m_icon.relativePosition = new Vector3(10, 5);
 
-            _title.relativePosition = new Vector3(50, 13);
-            _title.text = Title;
+            m_title.relativePosition = new Vector3(50, 13);
+            m_title.text = title;
 
-            _close.relativePosition = new Vector3(width - 35, 2);
-            _close.normalBgSprite = "buttonclose";
-            _close.hoveredBgSprite = "buttonclosehover";
-            _close.pressedBgSprite = "buttonclosepressed";
-            _close.eventClick += (component, param) => parent.Hide();
+            closeButton.atlas = UIUtils.defaultAtlas;
+            closeButton.relativePosition = new Vector3(width - 35, 2);
+            closeButton.normalBgSprite = "buttonclose";
+            closeButton.hoveredBgSprite = "buttonclosehover";
+            closeButton.pressedBgSprite = "buttonclosepressed";
+            closeButton.eventClick += (component, param) => parent.Hide();
         }
     }
 }

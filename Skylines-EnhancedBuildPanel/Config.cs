@@ -4,14 +4,12 @@ using UnityEngine;
 
 namespace EnhancedBuildPanel
 {
-
     public class Configuration
     {
-
         public Vector2 PanelPosition;
+        public bool PanelPositionSet = false;
         public Vector2 PanelSize;
         public int ScrollSpeed;
-        public bool PanelPositionSet = false;
 
         public void OnPreSerialize()
         {
@@ -23,7 +21,7 @@ namespace EnhancedBuildPanel
 
         public static void Serialize(string filename, Configuration config)
         {
-            var serializer = new XmlSerializer(typeof(Configuration));
+            var serializer = new XmlSerializer(typeof (Configuration));
 
             using (var writer = new StreamWriter(filename))
             {
@@ -34,21 +32,22 @@ namespace EnhancedBuildPanel
 
         public static Configuration Deserialize(string filename)
         {
-            var serializer = new XmlSerializer(typeof(Configuration));
+            var serializer = new XmlSerializer(typeof (Configuration));
 
             try
             {
                 using (var reader = new StreamReader(filename))
                 {
-                    var config = (Configuration)serializer.Deserialize(reader);
+                    var config = (Configuration) serializer.Deserialize(reader);
                     config.OnPostDeserialize();
                     return config;
                 }
             }
-            catch { }
+            catch
+            {
+            }
 
             return null;
         }
     }
-
 }

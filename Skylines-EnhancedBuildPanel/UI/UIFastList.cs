@@ -2,96 +2,77 @@
 using ColossalFramework.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
-using System.Collections.Generic;
 
-namespace EnhancedBuildPanel.UI
+namespace MeshInfo.GUI
 {
     public interface IUIFastListRow
     {
         #region Methods to implement
+
         /// <summary>
-        /// Method invoked very often, make sure it is fast
-        /// Avoid doing any calculations, the data should be already processed any ready to display.
+        ///     Method invoked very often, make sure it is fast
+        ///     Avoid doing any calculations, the data should be already processed any ready to display.
         /// </summary>
         /// <param name="data">What needs to be displayed</param>
         /// <param name="isRowOdd">Use this to display a different look for your odd rows</param>
         void Display(object data, bool isRowOdd);
 
         /// <summary>
-        /// Change the style of the selected row here
+        ///     Change the style of the selected row here
         /// </summary>
         /// <param name="isRowOdd">Use this to display a different look for your odd rows</param>
         void Select(bool isRowOdd);
+
         /// <summary>
-        /// Change the style of the row back from selected here
+        ///     Change the style of the row back from selected here
         /// </summary>
         /// <param name="isRowOdd">Use this to display a different look for your odd rows</param>
         void Deselect(bool isRowOdd);
+
         #endregion
 
         #region From UIPanel
+
         // No need to implement those, they are in UIPanel
         // Those are declared here so they can be used inside UIFastList
-        bool Enabled { get; set; }
-        Vector3 RelativePosition { get; set; }
-        event MouseEventHandler EventClick;
+        bool enabled { get; set; }
+        Vector3 relativePosition { get; set; }
+        event MouseEventHandler eventClick;
+
         #endregion
     }
 
     /// <summary>
-    /// This component is specifically designed the handle the display of
-    /// very large amount of rows in a scrollable panel while minimizing
-    /// the impact on the performances.
-    /// 
-    /// This class will instantiate the rows for you based on the actual
-    /// height of the UIFastList and the rowHeight value provided.
-    /// 
-    /// The row class must inherit UIPanel and implement IUIFastListRow :
-    /// public class MyCustomRow : UIPanel, IUIFastListRow
-    /// 
-    /// How it works :
-    /// This class only instantiate as many rows as visible on screen (+1
-    /// extra to simulate in-between steps). Then the content of those is
-    /// updated according to what needs to be displayed by calling the
-    /// Display method declared in IUIFastListRow.
-    /// 
-    /// Provide the list of data with rowData. This data is send back to
-    /// your custom row when it needs to be displayed. For optimal
-    /// performances, make sure this data is already processed and ready
-    /// to display.
-    /// 
-    /// Creation example :
-    /// UIFastList myFastList = UIFastList.Create<MyCustomRow>(this);
-    /// myFastList.size = new Vector2(200f, 300f);
-    /// myFastList.rowHeight = 40f;
-    /// myFastList.rowData = myDataList;
-    /// 
+    ///     This component is specifically designed the handle the display of
+    ///     very large amount of rows in a scrollable panel while minimizing
+    ///     the impact on the performances.
+    ///     This class will instantiate the rows for you based on the actual
+    ///     height of the UIFastList and the rowHeight value provided.
+    ///     The row class must inherit UIPanel and implement IUIFastListRow :
+    ///     public class MyCustomRow : UIPanel, IUIFastListRow
+    ///     How it works :
+    ///     This class only instantiate as many rows as visible on screen (+1
+    ///     extra to simulate in-between steps). Then the content of those is
+    ///     updated according to what needs to be displayed by calling the
+    ///     Display method declared in IUIFastListRow.
+    ///     Provide the list of data with rowData. This data is send back to
+    ///     your custom row when it needs to be displayed. For optimal
+    ///     performances, make sure this data is already processed and ready
+    ///     to display.
+    ///     Creation example :
+    ///     UIFastList myFastList = UIFastList.Create
+    ///     <MyCustomRow>
+    ///         (this);
+    ///         myFastList.size = new Vector2(200f, 300f);
+    ///         myFastList.rowHeight = 40f;
+    ///         myFastList.rowData = myDataList;
     /// </summary>
     public class UIFastList : UIComponent
     {
-        #region Private members
-        private UIPanel _mPanel;
-        private UIScrollbar _mScrollbar;
-        private FastList<IUIFastListRow> _mRows;
-        private FastList<object> _mRowsData;
-
-        private Type _mRowType;
-        private string _mBackgroundSprite;
-        private Color32 _mColor = new Color32(255, 255, 255, 255);
-        private float _mRowHeight = -1;
-        private float _mPos = -1;
-        private float _mStepSize = 0;
-        private bool _mCanSelect = false;
-        private int _mSelectedDataId = -1;
-        private int _mSelectedRowId = -1;
-        private bool _mLock = false;
-        private bool _mUpdateContent = true;
-        #endregion
-
         /// <summary>
-        /// Use this to create the UIFastList.
-        /// Do NOT use AddUIComponent.
-        /// I had to do that way because MonoBehaviors classes cannot be generic
+        ///     Use this to create the UIFastList.
+        ///     Do NOT use AddUIComponent.
+        ///     I had to do that way because MonoBehaviors classes cannot be generic
         /// </summary>
         /// <typeparam name="T">The type of the row UI component</typeparam>
         /// <param name="parent"></param>
@@ -99,238 +80,275 @@ namespace EnhancedBuildPanel.UI
         public static UIFastList Create<T>(UIComponent parent)
             where T : UIPanel, IUIFastListRow
         {
-            UIFastList list = new UIFastList {_mRowType = typeof (T)};
+            var list = parent.AddUIComponent<UIFastList>();
+            list.m_rowType = typeof (T);
             return list;
         }
 
-        #region Public accessors
+        #region Events
+
         /// <summary>
-        /// Change the color of the background
+        ///     Called when the currently selected row changed
         /// </summary>
-        public Color32 BackgroundColor
+        public event PropertyChangedEventHandler<int> eventSelectedIndexChanged;
+
+        #endregion
+
+        #region Private members
+
+        private UIPanel m_panel;
+        private UIScrollbar m_scrollbar;
+        private FastList<IUIFastListRow> m_rows;
+        private FastList<object> m_rowsData;
+
+        private Type m_rowType;
+        private string m_backgroundSprite;
+        private Color32 m_color = new Color32(255, 255, 255, 255);
+        private float m_rowHeight = -1;
+        private float m_pos = -1;
+        private float m_stepSize;
+        private bool m_canSelect;
+        private int m_selectedDataId = -1;
+        private int m_selectedRowId = -1;
+        private bool m_lock;
+        private bool m_updateContent = true;
+
+        #endregion
+
+        #region Public accessors
+
+        /// <summary>
+        ///     Change the color of the background
+        /// </summary>
+        public Color32 backgroundColor
         {
-            get { return _mColor; }
+            get { return m_color; }
             set
             {
-                _mColor = value;
-                if (_mPanel != null)
-                    _mPanel.color = value;
+                m_color = value;
+                if (m_panel != null)
+                    m_panel.color = value;
             }
         }
 
         /// <summary>
-        /// Change the sprite of the background
+        ///     Change the sprite of the background
         /// </summary>
-        public string BackgroundSprite
+        public string backgroundSprite
         {
-            get { return _mBackgroundSprite; }
+            get { return m_backgroundSprite; }
             set
             {
-                if (_mBackgroundSprite != value)
+                if (m_backgroundSprite != value)
                 {
-                    _mBackgroundSprite = value;
-                    if (_mPanel != null)
-                        _mPanel.backgroundSprite = value;
+                    m_backgroundSprite = value;
+                    if (m_panel != null)
+                        m_panel.backgroundSprite = value;
                 }
             }
         }
 
         /// <summary>
-        /// Can rows be selected by clicking on them
-        /// Default value is false
-        /// Rows can still be selected via selectedIndex
+        ///     Can rows be selected by clicking on them
+        ///     Default value is false
+        ///     Rows can still be selected via selectedIndex
         /// </summary>
-        public bool CanSelect
+        public bool canSelect
         {
-            get { return _mCanSelect; }
+            get { return m_canSelect; }
             set
             {
-                if (_mCanSelect != value)
+                if (m_canSelect != value)
                 {
-                    _mCanSelect = value;
+                    m_canSelect = value;
 
-                    if (_mRows == null) return;
-                    for (int i = 0; i < _mRows.m_size; i++)
+                    if (m_rows == null) return;
+                    for (var i = 0; i < m_rows.m_size; i++)
                     {
-                        if (_mCanSelect)
-                            _mRows[i].EventClick += OnRowClicked;
+                        if (m_canSelect)
+                            m_rows[i].eventClick += OnRowClicked;
                         else
-                            _mRows[i].EventClick -= OnRowClicked;
+                            m_rows[i].eventClick -= OnRowClicked;
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Change the position in the list
-        /// Display the data at the position in the top row.
-        /// This doesn't update the list if the position stay the same
-        /// Use DisplayAt for that
+        ///     Change the position in the list
+        ///     Display the data at the position in the top row.
+        ///     This doesn't update the list if the position stay the same
+        ///     Use DisplayAt for that
         /// </summary>
-        public float ListPosition
+        public float listPosition
         {
-            get { return _mPos; }
+            get { return m_pos; }
             set
             {
-                if (_mRowHeight <= 0) return;
-                if (_mPos != value)
+                if (m_rowHeight <= 0) return;
+                if (m_pos != value)
                 {
-                    float pos = Mathf.Max(Mathf.Min(value, _mRowsData.m_size - height / _mRowHeight), 0);
-                    _mUpdateContent = Mathf.FloorToInt(_mPos) != Mathf.FloorToInt(pos);
+                    var pos = Mathf.Max(Mathf.Min(value, m_rowsData.m_size - height/m_rowHeight), 0);
+                    m_updateContent = Mathf.FloorToInt(m_pos) != Mathf.FloorToInt(pos);
                     DisplayAt(pos);
                 }
             }
         }
 
         /// <summary>
-        /// This is the list of data that will be send to the IUIFastListRow.Display method
-        /// Changing this list will reset the display position to 0
-        /// You can also change rowsData.m_buffer and rowsData.m_size
-        /// and refresh the display with DisplayAt method
+        ///     This is the list of data that will be send to the IUIFastListRow.Display method
+        ///     Changing this list will reset the display position to 0
+        ///     You can also change rowsData.m_buffer and rowsData.m_size
+        ///     and refresh the display with DisplayAt method
         /// </summary>
-        public FastList<object> RowsData
+        public FastList<object> rowsData
         {
             get
             {
-                if (_mRowsData == null) _mRowsData = new FastList<object>();
-                return _mRowsData;
+                if (m_rowsData == null) m_rowsData = new FastList<object>();
+                return m_rowsData;
             }
             set
             {
-                if (_mRowsData != value)
+                if (m_rowsData != value)
                 {
-                    _mRowsData = value;
+                    m_rowsData = value;
                     DisplayAt(0);
                 }
             }
         }
 
         /// <summary>
-        /// This MUST be set, it is the height in pixels of each row
+        ///     This MUST be set, it is the height in pixels of each row
         /// </summary>
-        public float RowHeight
+        public float rowHeight
         {
-            get { return _mRowHeight; }
+            get { return m_rowHeight; }
             set
             {
-                if (_mRowHeight != value)
+                if (m_rowHeight != value)
                 {
-                    _mRowHeight = value;
+                    m_rowHeight = value;
                     CheckRows();
                 }
             }
         }
 
         /// <summary>
-        /// Currently selected row
-        /// -1 if none selected
+        ///     Currently selected row
+        ///     -1 if none selected
         /// </summary>
-        public int SelectedIndex
+        public int selectedIndex
         {
-            get { return _mSelectedDataId; }
+            get { return m_selectedDataId; }
             set
             {
-                if (_mRowsData == null) return;
-
-                int oldId = _mSelectedDataId;
-                if (oldId >= _mRowsData.m_size) oldId = -1;
-                _mSelectedDataId = Mathf.Min(Mathf.Max(-1, value), _mRowsData.m_size - 1);
-
-                int pos = Mathf.FloorToInt(_mPos);
-                int newRowId = Mathf.Max(-1, _mSelectedDataId - pos);
-                if (newRowId >= _mRows.m_size) newRowId = -1;
-
-                if (newRowId >= 0 && newRowId == _mSelectedRowId && !_mUpdateContent) return;
-
-                if (_mSelectedRowId >= 0)
+                if (m_rowsData == null || m_rowsData.m_size == 0)
                 {
-                    _mRows[_mSelectedRowId].Deselect((oldId % 2) == 1);
-                    _mSelectedRowId = -1;
+                    m_selectedDataId = -1;
+                    return;
+                }
+
+                var oldId = m_selectedDataId;
+                if (oldId >= m_rowsData.m_size) oldId = -1;
+                m_selectedDataId = Mathf.Min(Mathf.Max(-1, value), m_rowsData.m_size - 1);
+
+                var pos = Mathf.FloorToInt(m_pos);
+                var newRowId = Mathf.Max(-1, m_selectedDataId - pos);
+                if (newRowId >= m_rows.m_size) newRowId = -1;
+
+                if (newRowId >= 0 && newRowId == m_selectedRowId && !m_updateContent) return;
+
+                if (m_selectedRowId >= 0)
+                {
+                    m_rows[m_selectedRowId].Deselect((oldId%2) == 1);
+                    m_selectedRowId = -1;
                 }
 
                 if (newRowId >= 0)
                 {
-                    _mSelectedRowId = newRowId;
-                    _mRows[_mSelectedRowId].Select((_mSelectedDataId % 2) == 1);
+                    m_selectedRowId = newRowId;
+                    m_rows[m_selectedRowId].Select((m_selectedDataId%2) == 1);
                 }
 
-                if (EventSelectedIndexChanged != null && _mSelectedDataId != oldId)
-                    EventSelectedIndexChanged(this, _mSelectedDataId);
+                if (eventSelectedIndexChanged != null && m_selectedDataId != oldId)
+                    eventSelectedIndexChanged(this, m_selectedDataId);
             }
         }
 
         /// <summary>
-        /// The number of pixels moved at each scroll step
-        /// When set to 0 or less, rowHeight is used instead.
+        ///     The number of pixels moved at each scroll step
+        ///     When set to 0 or less, rowHeight is used instead.
         /// </summary>
-        public float StepSize
+        public float stepSize
         {
-            get { return (_mStepSize > 0) ? _mStepSize : _mRowHeight; }
-            set { _mStepSize = value; }
+            get { return (m_stepSize > 0) ? m_stepSize : m_rowHeight; }
+            set { m_stepSize = value; }
         }
-        #endregion
 
-        #region Events
-        /// <summary>
-        /// Called when the currently selected row changed
-        /// </summary>
-        public event PropertyChangedEventHandler<int> EventSelectedIndexChanged;
         #endregion
 
         #region Public methods
+
         /// <summary>
-        /// Clear the list
+        ///     Clear the list
         /// </summary>
         public void Clear()
         {
-            _mRowsData.Clear();
+            m_rowsData.Clear();
 
-            for (int i = 0; i < _mRows.m_size; i++)
+            for (var i = 0; i < m_rows.m_size; i++)
             {
-                _mRows[i].Enabled = false;
+                m_rows[i].enabled = false;
             }
 
             UpdateScrollbar();
         }
 
         /// <summary>
-        /// Display the data at the position in the top row.
-        /// This update the list even if the position remind the same
+        ///     Display the data at the position in the top row.
+        ///     This update the list even if the position remind the same
         /// </summary>
         /// <param name="pos">Index position in the list</param>
         public void DisplayAt(float pos)
         {
-            if (_mRowsData == null || _mRowHeight <= 0) return;
+            if (m_rowsData == null || m_rowHeight <= 0) return;
 
-            _mPos = Mathf.Max(Mathf.Min(pos, _mRowsData.m_size - height / _mRowHeight), 0f);
+            SetupControls();
 
-            for (int i = 0; i < _mRows.m_size; i++)
+            m_pos = Mathf.Max(Mathf.Min(pos, m_rowsData.m_size - height/m_rowHeight), 0f);
+
+            for (var i = 0; i < m_rows.m_size; i++)
             {
-                int dataPos = Mathf.FloorToInt(_mPos + i);
-                float offset = RowHeight * (_mPos + i - dataPos);
-                if (dataPos < _mRowsData.m_size)
+                var dataPos = Mathf.FloorToInt(m_pos + i);
+                var offset = rowHeight*(m_pos + i - dataPos);
+                if (dataPos < m_rowsData.m_size)
                 {
-                    if (_mUpdateContent)
-                        _mRows[i].Display(_mRowsData[dataPos], (dataPos % 2) == 1);
+                    if (m_updateContent)
+                        m_rows[i].Display(m_rowsData[dataPos], (dataPos%2) == 1);
 
-                    if (dataPos == _mSelectedDataId && _mUpdateContent)
+                    if (dataPos == m_selectedDataId && m_updateContent)
                     {
-                        _mSelectedRowId = i;
-                        _mRows[_mSelectedRowId].Select((dataPos % 2) == 1);
+                        m_selectedRowId = i;
+                        m_rows[m_selectedRowId].Select((dataPos%2) == 1);
                     }
 
-                    _mRows[i].Enabled = true;
-                    _mRows[i].RelativePosition = new Vector3(0, i * RowHeight - offset);
+                    m_rows[i].enabled = true;
                 }
                 else
-                    _mRows[i].Enabled = false;
+                    m_rows[i].enabled = false;
+
+                m_rows[i].relativePosition = new Vector3(0, i*rowHeight - offset);
             }
+
             UpdateScrollbar();
-            _mUpdateContent = true;
+            m_updateContent = true;
         }
+
         #endregion
 
         #region Overrides
+
         public override void Start()
         {
             base.Start();
@@ -342,16 +360,16 @@ namespace EnhancedBuildPanel.UI
         {
             base.OnDestroy();
 
-            if (_mPanel == null) return;
+            if (m_panel == null) return;
 
-            Destroy(_mPanel);
-            Destroy(_mScrollbar);
+            Destroy(m_panel);
+            Destroy(m_scrollbar);
 
-            if (_mRows == null) return;
+            if (m_rows == null) return;
 
-            for (int i = 0; i < _mRows.m_size; i++)
+            for (var i = 0; i < m_rows.m_size; i++)
             {
-                Destroy(_mRows[i] as Object);
+                Destroy(m_rows[i] as Object);
             }
         }
 
@@ -359,13 +377,13 @@ namespace EnhancedBuildPanel.UI
         {
             base.OnSizeChanged();
 
-            if (_mPanel == null) return;
+            if (m_panel == null) return;
 
-            _mPanel.size = size;
+            m_panel.size = size;
 
-            _mScrollbar.height = height;
-            _mScrollbar.trackObject.height = height;
-            _mScrollbar.AlignTo(this, UIAlignAnchor.TopRight);
+            m_scrollbar.height = height;
+            m_scrollbar.trackObject.height = height;
+            m_scrollbar.AlignTo(this, UIAlignAnchor.TopRight);
 
             CheckRows();
         }
@@ -374,22 +392,24 @@ namespace EnhancedBuildPanel.UI
         {
             base.OnMouseWheel(p);
 
-            if (_mStepSize > 0 && _mRowHeight > 0)
-                ListPosition = _mPos - p.wheelDelta * _mStepSize / _mRowHeight;
+            if (m_stepSize > 0 && m_rowHeight > 0)
+                listPosition = m_pos - p.wheelDelta*m_stepSize/m_rowHeight;
             else
-                ListPosition = _mPos - p.wheelDelta;
+                listPosition = m_pos - p.wheelDelta;
         }
+
         #endregion
 
         #region Private methods
 
         protected void OnRowClicked(UIComponent component, UIMouseEventParameter p)
         {
-            for (int i = 0; i < RowsData.m_size; i++)
+            var max = Mathf.Min(m_rowsData.m_size, m_rows.m_size);
+            for (var i = 0; i < max; i++)
             {
-                if (component == (UIComponent)_mRows[i])
+                if (component == (UIComponent) m_rows[i])
                 {
-                    SelectedIndex = i + Mathf.FloorToInt(_mPos);
+                    selectedIndex = i + Mathf.FloorToInt(m_pos);
                     return;
                 }
             }
@@ -397,32 +417,32 @@ namespace EnhancedBuildPanel.UI
 
         private void CheckRows()
         {
-            if (_mPanel == null || _mRowHeight <= 0) return;
+            if (m_panel == null || m_rowHeight <= 0) return;
 
-            int nbRows = Mathf.CeilToInt(height / _mRowHeight) + 1;
+            var nbRows = Mathf.CeilToInt(height/m_rowHeight) + 1;
 
-            if (_mRows == null)
+            if (m_rows == null)
             {
-                _mRows = new FastList<IUIFastListRow>();
-                _mRows.SetCapacity(nbRows);
+                m_rows = new FastList<IUIFastListRow>();
+                m_rows.SetCapacity(nbRows);
             }
 
-            if (_mRows.m_size < nbRows)
+            if (m_rows.m_size < nbRows)
             {
                 // Adding missing rows
-                for (int i = _mRows.m_size; i < nbRows; i++)
+                for (var i = m_rows.m_size; i < nbRows; i++)
                 {
-                    _mRows.Add(_mPanel.AddUIComponent(_mRowType) as IUIFastListRow);
-                    if (_mCanSelect) _mRows[i].EventClick += OnRowClicked;
+                    m_rows.Add(m_panel.AddUIComponent(m_rowType) as IUIFastListRow);
+                    if (m_canSelect) m_rows[i].eventClick += OnRowClicked;
                 }
             }
-            else if (_mRows.m_size > nbRows)
+            else if (m_rows.m_size > nbRows)
             {
                 // Remove excess rows
-                for (int i = nbRows; i < _mRows.m_size; i++)
-                    Destroy(_mRows[i] as Object);
+                for (var i = nbRows; i < m_rows.m_size; i++)
+                    Destroy(m_rows[i] as Object);
 
-                _mRows.SetCapacity(nbRows);
+                m_rows.SetCapacity(nbRows);
             }
 
             UpdateScrollbar();
@@ -430,87 +450,93 @@ namespace EnhancedBuildPanel.UI
 
         private void UpdateScrollbar()
         {
-            if (_mRowsData == null || _mRowHeight <= 0) return;
+            if (m_rowsData == null || m_rowHeight <= 0) return;
 
-            float h = _mRowHeight * _mRowsData.m_size;
-            float scrollSize = height * height / (_mRowHeight * _mRowsData.m_size);
-            float amount = StepSize * height / (_mRowHeight * _mRowsData.m_size);
+            var H = m_rowHeight*m_rowsData.m_size;
+            var scrollSize = height*height/(m_rowHeight*m_rowsData.m_size);
+            var amount = stepSize*height/(m_rowHeight*m_rowsData.m_size);
 
-            _mScrollbar.scrollSize = Mathf.Max(10f, scrollSize);
-            _mScrollbar.minValue = 0f;
-            _mScrollbar.maxValue = height;
-            _mScrollbar.incrementAmount = Mathf.Max(1f, amount);
+            m_scrollbar.scrollSize = Mathf.Max(10f, scrollSize);
+            m_scrollbar.minValue = 0f;
+            m_scrollbar.maxValue = height;
+            m_scrollbar.incrementAmount = Mathf.Max(1f, amount);
             UpdateScrollPosition();
         }
 
         private void UpdateScrollPosition()
         {
-            if (_mLock || _mRowHeight <= 0) return;
+            if (m_lock || m_rowHeight <= 0) return;
 
-            _mLock = true;
+            m_lock = true;
 
-            float pos = _mPos * (height - _mScrollbar.scrollSize) / (_mRowsData.m_size - height / _mRowHeight);
-            if (pos != _mScrollbar.value)
-                _mScrollbar.value = pos;
+            var pos = m_pos*(height - m_scrollbar.scrollSize)/(m_rowsData.m_size - height/m_rowHeight);
+            if (pos != m_scrollbar.value)
+                m_scrollbar.value = pos;
 
-            _mLock = false;
+            m_lock = false;
         }
 
 
         private void SetupControls()
         {
-            if (_mPanel != null) return;
+            if (m_panel != null) return;
 
             // Panel 
-            _mPanel = AddUIComponent<UIPanel>();
-            _mPanel.size = size;
-            _mPanel.backgroundSprite = _mBackgroundSprite;
-            _mPanel.color = _mColor;
-            _mPanel.clipChildren = true;
-            _mPanel.relativePosition = Vector2.zero;
+            m_panel = AddUIComponent<UIPanel>();
+            m_panel.atlas = UIUtils.defaultAtlas;
+            m_panel.width = width - 10f;
+            m_panel.height = height;
+            m_panel.backgroundSprite = m_backgroundSprite;
+            m_panel.color = m_color;
+            m_panel.clipChildren = true;
+            m_panel.relativePosition = Vector2.zero;
 
             // Scrollbar
-            _mScrollbar = AddUIComponent<UIScrollbar>();
-            _mScrollbar.width = 20f;
-            _mScrollbar.height = height;
-            _mScrollbar.orientation = UIOrientation.Vertical;
-            _mScrollbar.pivot = UIPivotPoint.BottomLeft;
-            _mScrollbar.AlignTo(this, UIAlignAnchor.TopRight);
-            _mScrollbar.minValue = 0;
-            _mScrollbar.value = 0;
-            _mScrollbar.incrementAmount = 50;
+            m_scrollbar = AddUIComponent<UIScrollbar>();
+            m_scrollbar.width = 20f;
+            m_scrollbar.height = height;
+            m_scrollbar.orientation = UIOrientation.Vertical;
+            m_scrollbar.pivot = UIPivotPoint.BottomLeft;
+            m_scrollbar.AlignTo(this, UIAlignAnchor.TopRight);
+            m_scrollbar.minValue = 0;
+            m_scrollbar.value = 0;
+            m_scrollbar.incrementAmount = 50;
 
-            UISlicedSprite tracSprite = _mScrollbar.AddUIComponent<UISlicedSprite>();
+            var tracSprite = m_scrollbar.AddUIComponent<UISlicedSprite>();
+            tracSprite.atlas = UIUtils.defaultAtlas;
             tracSprite.relativePosition = Vector2.zero;
             tracSprite.autoSize = true;
             tracSprite.size = tracSprite.parent.size;
             tracSprite.fillDirection = UIFillDirection.Vertical;
             tracSprite.spriteName = "ScrollbarTrack";
 
-            _mScrollbar.trackObject = tracSprite;
+            m_scrollbar.trackObject = tracSprite;
 
-            UISlicedSprite thumbSprite = tracSprite.AddUIComponent<UISlicedSprite>();
+            var thumbSprite = tracSprite.AddUIComponent<UISlicedSprite>();
+            thumbSprite.atlas = UIUtils.defaultAtlas;
             thumbSprite.relativePosition = Vector2.zero;
             thumbSprite.fillDirection = UIFillDirection.Vertical;
             thumbSprite.autoSize = true;
             thumbSprite.width = thumbSprite.parent.width - 8;
             thumbSprite.spriteName = "ScrollbarThumb";
 
-            _mScrollbar.thumbObject = thumbSprite;
+            m_scrollbar.thumbObject = thumbSprite;
 
             // Rows
             CheckRows();
 
-            _mScrollbar.eventValueChanged += (c, t) =>
+            m_scrollbar.eventValueChanged += (c, t) =>
             {
-                if (_mLock || _mRowHeight <= 0) return;
+                if (m_lock || m_rowHeight <= 0) return;
 
-                _mLock = true;
+                m_lock = true;
 
-                ListPosition = _mScrollbar.value * (_mRowsData.m_size - height / _mRowHeight) / (height - _mScrollbar.scrollSize - 1f);
-                _mLock = false;
+                listPosition = m_scrollbar.value*(m_rowsData.m_size - height/m_rowHeight)/
+                               (height - m_scrollbar.scrollSize - 1f);
+                m_lock = false;
             };
         }
+
         #endregion
     }
 }

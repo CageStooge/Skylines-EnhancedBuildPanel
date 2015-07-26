@@ -69,14 +69,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeFile1.cs" />
+    <Compile Include="MeshData.cs" />
     <Compile Include="UI\UIFastList.cs" />
+    <Compile Include="UI\UIPrefabItem.cs" />
+    <Compile Include="UI\UIShowAssets.cs" />
     <Compile Include="UI\UIUtils.cs" />
     <Compile Include="UI\UITitleBar.cs" />
-    <Compile Include="UI\UIGetAssets.cs" />
     <Compile Include="UI\UIMainPanel.cs" />
     <Compile Include="Mod.cs" />
-    <Compile Include="EnhancedBuildPanel.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
