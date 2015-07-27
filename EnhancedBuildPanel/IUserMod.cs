@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ColossalFramework.UI;
-using EnhancedBuildPanel.GUI_89;
+using EnhancedBuildPanel.GUI_01;
 using ICities;
 using UnityEngine;
 using Object = UnityEngine.Object;

@@ -1,7 +1,7 @@
 ﻿using ColossalFramework.UI;
 using UnityEngine;
 
-namespace EnhancedBuildPanel.GUI_89
+namespace EnhancedBuildPanel.GUI_01
 {
     public class UITitleBar : UIPanel
     {

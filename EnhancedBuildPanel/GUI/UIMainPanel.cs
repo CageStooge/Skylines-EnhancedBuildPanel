@@ -7,7 +7,7 @@ using ColossalFramework.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace EnhancedBuildPanel.GUI_89
+namespace EnhancedBuildPanel.GUI_01
 {
     public class UIMainPanel : UIPanel
     {
@@ -92,6 +92,7 @@ namespace EnhancedBuildPanel.GUI_89
         {
             Debug.Log("loading config at update panel routine");
             LoadConfig();
+            
             Debug.Log("setting uiMainpanel");
             var uiMainPanel = GameObject.FindObjectOfType<UIMainPanel>();
 
