@@ -7,7 +7,7 @@ using ColossalFramework.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace EnhancedBuildPanel.GUI_01
+namespace EnhancedBuildPanel.GUI_09
 {
     public class UIMainPanel : UIPanel
     {

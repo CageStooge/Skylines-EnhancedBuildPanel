@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EnhancedBuildPanel.GUI_01;
+using EnhancedBuildPanel.GUI_09;
 using ColossalFramework;
 using ColossalFramework.UI;
 using UnityEngine;
@@ -9,18 +9,29 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 
-namespace EnhancedBuildPanel
+namespace EnhancedBuildPanel 
 {
+    public interface IButtons
+    {
+        void UIButtons(string panelName, UIComponent component);
 
-    class GetPanelButtons : UIButton
+    }
+
+    class GetPanelButtons : IButtons
     {
         /* 
          * parentPanel just lets us know what to attach the buttons to.
          */
 
-        public void UIButtons(UIMainPanel parentPanel)
+        public void UIButtons(string panelName, UIComponent component)
         {
-           string panelName = "RoadsSmallPanel";
+            if (panelName == null)
+            {
+                Debug.Log(String.Format("No panel was given", ""));
+                return;
+            }
+            string _panelName = panelName;
+            Debug.Log(String.Format("Checking to see if we can find {0}", panelName));
             var panels = GameObject.Find(panelName);
             
             //var buttonList = new List<UIButton>();
@@ -48,8 +59,8 @@ namespace EnhancedBuildPanel
                 try
                 {
                     Debug.Log(string.Format("creating clone of {0}", button));
-
-                    UIButton cloneButton = Instantiate(button);
+                    UIButton cloneButton = new UIButton();
+                    cloneButton = button;
                     Debug.Log(string.Format("Setting fields for cloned object"));
                     
                     cloneButton.name = EnhancedBuildPanel.Acronym + "_" + button.name;
@@ -60,7 +71,7 @@ namespace EnhancedBuildPanel
 
 
                     Debug.Log(string.Format("clonebutton is {0}", cloneButton));
-                    cloneButton.transform.parent = parentPanel.transform;
+                    cloneButton.transform.parent = component.transform;
 
                     Debug.Log(string.Format("Cloned button {0} to button {1}  and attached it to {2}!", button, cloneButton, cloneButton.parent));
                 }
@@ -102,9 +113,5 @@ namespace EnhancedBuildPanel
             }
         }
     }
-
-    interface abc
-    {
-
-    }
 }
+

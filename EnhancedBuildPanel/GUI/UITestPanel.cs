@@ -7,11 +7,12 @@ using ColossalFramework.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace EnhancedBuildPanel.GUI_01
+namespace EnhancedBuildPanel.GUI_09
 {
     public class UIScrollPanel : UIPanel
     {
         #region variables
+
 
         private bool resizing = false;
         private UITitleBar _title;
@@ -25,6 +26,7 @@ namespace EnhancedBuildPanel.GUI_01
         public override void Start()
         {
             Debug.Log(String.Format("Startup setting values", ""));
+
             name = EnhancedBuildPanel.Acronym;
             atlas = UIUtils.GetAtlas("Ingame");
             backgroundSprite = "UnlockingPanel2";
@@ -43,16 +45,14 @@ namespace EnhancedBuildPanel.GUI_01
 
             CreateTitleBar();
             CreateResizeHandle();
+            GetAssetButtons();
             base.Start();
 
 
             #endregion
-
-
         }
 
         #region Setup Controls
-
         private void CreateTitleBar()
         {
             _title = AddUIComponent<UITitleBar>();
@@ -62,6 +62,7 @@ namespace EnhancedBuildPanel.GUI_01
 
         private void CreateResizeHandle()
         {
+            Debug.Log(String.Format("Setting up resize handle", ""));
             var resizeButton = this.AddUIComponent<UIButton>();
             resizeButton.name = EnhancedBuildPanel.Acronym + "_ResizeButton";
             resizeButton.size = new Vector2(24.0f, 24.0f);
@@ -71,11 +72,13 @@ namespace EnhancedBuildPanel.GUI_01
             resizeButton.hoveredBgSprite = "buttonresize";
             resizeButton.pressedFgSprite = "buttonresize";
 
+            Debug.Log(String.Format("Setting up Mouse Hover event", ""));
             resizeButton.eventMouseHover += (component, param) =>
             {
                 resizeButton.color = Color.red;
             };
 
+            Debug.Log(String.Format("Setting up Mouse down event", ""));
             resizeButton.eventMouseDown += (component, param) =>
             {
                 resizeButton.color = Color.black;
@@ -83,6 +86,7 @@ namespace EnhancedBuildPanel.GUI_01
                 _resizeHandle = Input.mousePosition;
             };
 
+            Debug.Log(String.Format("Setting up mouse up event", ""));
             resizeButton.eventMouseUp += (component, param) =>
             {
                 resizeButton.color = Color.white;
@@ -90,20 +94,51 @@ namespace EnhancedBuildPanel.GUI_01
                 _resizeHandle = Vector2.zero;
             };
 
+            Debug.Log(String.Format("Setting resize button to new relative position", ""));
             resizeButton.relativePosition = new Vector3(0.0f, this.size.y, 0.0f);
 
+            
 
         }
 
-
-        private void CreateScrollBar()
+        private void GetAssetButtons()
         {
             
-        }
-        #endregion
+            IButtons buttons = new GetPanelButtons();
+            Debug.Log(String.Format("Setting up icons", ""));
+            buttons.UIButtons("RoadsSmallPanel", this);
+            
+            float x = 0.0f;
+            float y = 0.0f;
+            float iconWidth = this.transform.GetChild(0).GetComponent<UIButton>().size.x;
+            float iconHeight = this.transform.GetChild(0).GetComponent < UIButton>().size.y;
+            Debug.Log(String.Format("Looping through children", ""));
+            for (int i = 0; i < this.transform.GetChildCount();i++)
+            {
+                /*
+                 * What is being done is as each icon has their position placed into the panel during resizing,
+                 * we track the width that the icons are using per row. When it reaches a point that it will 
+                 * result in placing an icon outside of the panel, we shift down to the next row, and repeat the process
+                 */
+                var child = this.transform.GetChild(i).GetComponent<UIButton>();
+                child.relativePosition = new Vector3(x, y, 0.0f);
+                x += iconWidth;
+                if (x >= this.width - iconWidth)
+                {
+                    Debug.Log(String.Format("Need to move icons to a new row", ""));
+                    x = 0.0f;
+                    y += iconHeight;
 
+                }
+            }
+        }
+
+        #endregion
     }
 }
+
+    
+   
 
 
 
