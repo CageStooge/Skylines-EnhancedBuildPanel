@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ColossalFramework.UI;
-using EnhancedBuildPanel.GUI_2;
+using EnhancedBuildPanel.GUI_89;
 using ICities;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -17,7 +17,7 @@ namespace EnhancedBuildPanel
 
         public static string Version
         {
-            get { return "0.5.5"; }
+            get { return "0.5.8"; }
         }
         
         public static string Acronym

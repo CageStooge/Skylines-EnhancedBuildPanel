@@ -7,7 +7,7 @@ using ColossalFramework.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace EnhancedBuildPanel.GUI_2
+namespace EnhancedBuildPanel.GUI_89
 {
     public class UIMainPanel : UIPanel
     {
@@ -18,11 +18,41 @@ namespace EnhancedBuildPanel.GUI_2
         //private event MouseEventHandler eventClick;
         private RoadsOptionPanel roadsOptionPanel = new RoadsOptionPanel();
         ////private readonly UIGetButtons _uiGetButtons;
-
+        private bool resizing = false;
         private UIScrollablePanel _scrollablePanel;
         private UIScrollbar scrollBar;
         private UISlicedSprite trackSprite;
         private UISlicedSprite thumbSprite;
+        private Vector2 resizeHandle = Vector2.zero;
+        private bool moving = false;
+        private Vector2 moveHandle = Vector2.zero;
+        private static readonly string configPath = "EnhancedBuildPanelConfig.xml";
+        private Configuration config;
+        //private UIPanel uiMainPanel;
+        
+
+        private void LoadConfig()
+        {
+            config = Configuration.Deserialize(configPath);
+            if (config == null)
+            {
+                config = new Configuration();
+                SaveConfig();
+            }
+        }
+
+        private void SaveConfig()
+        {
+            Configuration.Deserialize(configPath);
+            {
+                Configuration.Serialize(configPath, config);
+                if (config == null)
+                {
+                    config = new Configuration();
+                    SaveConfig();
+                }
+            }
+        }
         public override void Start()
         {
 
@@ -30,7 +60,7 @@ namespace EnhancedBuildPanel.GUI_2
             //name = "myMod";
             atlas = UIUtils.GetAtlas("Ingame");
             backgroundSprite = "UnlockingPanel2";
-            size = new Vector2(850, 850);
+            size = new Vector2(400f, 400f);
             pivot = UIPivotPoint.TopLeft;
             isVisible = false;
             canFocus = true;
@@ -43,64 +73,55 @@ namespace EnhancedBuildPanel.GUI_2
             relativePosition = new Vector3(Mathf.Floor((GetUIView().fixedWidth - width) / 2),
                 Mathf.Floor((GetUIView().fixedHeight - height) / 2));
             Debug.Log("start setup controls");
+            SetupControls();
+            LoadConfig();
 
 
-            //Setup scrollable Panel ... this should be fun ..
-            Debug.Log("Creating Scrollable panel2");
-            _scrollablePanel = AddUIComponent<UIScrollablePanel>();
-            _scrollablePanel.transform.parent = transform;
-            Debug.Log(string.Format("parent of scrollable panel is {0}", _scrollablePanel.parent.name));
-            Debug.Log("Naming scrollable panel");
-            _scrollablePanel.name = EnhancedBuildPanel.Acronym + "_ScrollablePanel";
-            _scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
-            _scrollablePanel.horizontalScrollbar = null;
-            Debug.Log("Setting scrollbar ");
-            _scrollablePanel.verticalScrollbar = scrollBar;
-            
-            _scrollablePanel.scrollWheelAmount = 16;
-            _scrollablePanel.autoLayout = false;
-            _scrollablePanel.autoSize = false;
-            Debug.Log("setting relative position of scrollable panel");
-            _scrollablePanel.relativePosition = new Vector3(2.0f, 2.0f, 0.0f);
-            Debug.Log(string.Format("setting width of scrollable panel currently at {0}", _scrollablePanel.width));
+           
 
-            //_scrollablePanel.width = 750f;
-            Debug.Log(string.Format("set based on parent width which is currently set to {0}", _scrollablePanel.parent.width));
-            _scrollablePanel.width = (_scrollablePanel.parent.width - 10.0f);
-            Debug.Log("setting height of scrollable panel");
-            //_scrollablePanel.height = 
-            _scrollablePanel.height = (_scrollablePanel.parent.height - 10.0f);
-            
-            
-            _scrollablePanel.autoLayout = true;
-            
-            //_scrollablePanel.FitChildrenHorizontally(5.0f);
-            _scrollablePanel.BringToFront();
-            
-/*            
-            _scrollablePanel.scrollPosition = new Vector2(0.0f, 16.0f);
 
-            Debug.Log(string.Format("current scroll position is {0}", _scrollablePanel.scrollPosition));
+           
+
             
-            _scrollablePanel.eventMouseWheel += (component, param) =>
+            base.Start(); 
+
+
+        }
+        
+        void UpdatePanel(UIPanel panel)
+        {
+            Debug.Log("loading config at update panel routine");
+            LoadConfig();
+            Debug.Log("setting uiMainpanel");
+            var uiMainPanel = GameObject.FindObjectOfType<UIMainPanel>();
+
+            
+            Debug.Log("checking if panel position is set");
+            if (!config.panelPositionSet)
             {
-                _scrollablePanel.scrollPosition = new Vector2(0.0f, _scrollablePanel.scrollPosition.y + -param.wheelDelta * 16.0f);
-            };
+                Debug.Log("it wasn't set");
+                config.panelPosition = uiMainPanel.relativePosition;
+                config.panelSize = uiMainPanel.size;
+                config.panelPositionSet = true;
+                Debug.Log("now it is set");
+            }
 
-            scrollBar.eventValueChanged += delegate(UIComponent component, float value)
-            {
-                _scrollablePanel.scrollPosition = new Vector2(0.0f, value);
-            };
-  */         
-           Debug.Log("shit");
+            Debug.Log("checking item count");
+            var itemCount = _scrollablePanel.transform.childCount;
 
+
+            Debug.Log("relative position setup");
+            uiMainPanel.relativePosition = config.panelPosition;
+            Debug.Log("Config panel something");
+            uiMainPanel.size = config.panelSize;
+            Debug.Log("setting up scrollbar");
             scrollBar = AddUIComponent<UIScrollbar>();
             Debug.Log("setting parent of scrollbar");
             scrollBar.transform.parent = _scrollablePanel.transform;
             Debug.Log("setting properties of scrollbar");
             scrollBar.autoHide = false;
             Debug.Log("set size of scrollbar");
-            scrollBar.size = new Vector2(20.0f, 50.0f);
+            scrollBar.size = new Vector2(20.0f, this.size.y - 26.0f);
             Debug.Log("Set orientation of scrollbar");
             scrollBar.orientation = UIOrientation.Vertical;
             Debug.Log("is test interactive scrollbar");
@@ -109,11 +130,11 @@ namespace EnhancedBuildPanel.GUI_2
             scrollBar.isVisible = true;
             scrollBar.enabled = true;
 
-            scrollBar.relativePosition = new Vector3(_scrollablePanel.size.x - 20.0f - 2.0f, 0.0f, 0);
+            scrollBar.relativePosition = new Vector3(this.size.x - 20.0f - 2.0f, 0.0f, 0);
             Debug.Log("set increment amount scrollbar");
             scrollBar.incrementAmount = 10;
 
-            Debug.Log("setting up track sprite");
+                        Debug.Log("setting up track sprite");
             trackSprite = scrollBar.AddUIComponent<UISlicedSprite>();
             trackSprite.name = "Track";
             trackSprite.relativePosition = Vector2.zero;
@@ -133,26 +154,127 @@ namespace EnhancedBuildPanel.GUI_2
             trackSprite.size = scrollBar.size;
             thumbSprite.width = trackSprite.width;
 
-            _scrollablePanel.scrollPosition = new Vector2(0.0f, 16.0f);
-
-            Debug.Log(string.Format("current scroll position is {0}", _scrollablePanel.scrollPosition));
-
-            _scrollablePanel.eventMouseWheel += (component, param) =>
+            Debug.Log(string.Format("Looking for resize button"));
+            var resizeButton = scrollBar.Find<UIButton>("ResizeButton");
+            Debug.Log("Checking if resize button is null");
+            if (resizeButton == null)
             {
-                _scrollablePanel.scrollPosition = new Vector2(0.0f, _scrollablePanel.scrollPosition.y + -param.wheelDelta * 16.0f);
-            };
+                Debug.Log("it was null so I'm setting it up");
+                resizeButton = scrollBar.AddUIComponent<UIButton>();
+                resizeButton.name = "ResizeButton";
+                resizeButton.size = new Vector2(24.0f, 24.0f);
+                resizeButton.AlignTo(scrollBar, UIAlignAnchor.TopLeft);
+                resizeButton.normalFgSprite = "buttonresize";
+                resizeButton.focusedFgSprite = "buttonresize";
+                resizeButton.hoveredFgSprite = "buttonresize";
+                resizeButton.pressedFgSprite = "buttonresize";
+                resizeButton.disabledFgSprite = "buttonresize";
 
-            scrollBar.eventValueChanged += delegate(UIComponent component, float value)
+                Debug.Log("Setting up the mouse event crap");
+                resizeButton.eventMouseHover += (component, param) =>
+                {
+                    resizeButton.color = Color.grey;
+                };
+                Debug.Log("setting up mouse event down");
+                resizeButton.eventMouseDown += (component, param) =>
+                {
+                    resizeButton.color = Color.black;
+                    resizing = true;
+                    resizeHandle = Input.mousePosition;
+                };
+                Debug.Log("setting up mouse up");
+                resizeButton.eventMouseUp += (component, param) =>
+                {
+                    resizeButton.color = Color.white;
+                    resizing = false;
+                    resizeHandle = Vector2.zero;
+                    Debug.Log("saving config");
+                    SaveConfig();
+                };
+            }
+            Debug.Log("setting up reszie button");
+            resizeButton.relativePosition = new Vector3(0.0f, scrollBar.size.y, 0.0f);
+
+            Debug.Log("checking if scrollable panel has a name");
+            if (_scrollablePanel.name != EnhancedBuildPanel.Acronym + "_ScrollablePanel")
             {
-                _scrollablePanel.scrollPosition = new Vector2(0.0f, value);
-            };
 
-  
-            
-            base.Start(); 
+                Debug.Log("setting up scrollpanel name");
+                    _scrollablePanel.name = EnhancedBuildPanel.Acronym + "_ScrollablePanel";
+                    _scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
+                    _scrollablePanel.horizontalScrollbar = null;
+                    _scrollablePanel.verticalScrollbar = scrollBar;
+                    _scrollablePanel.scrollWheelAmount = 16;
+                    _scrollablePanel.autoLayout = false;
+                    _scrollablePanel.autoSize = false;
+                Debug.Log("setting up relative position stuff");
+                    _scrollablePanel.relativePosition = new Vector3(2.0f, 2.0f, 0.0f);
 
-            SetupControls();
+                Debug.Log("settingup mouse wheel");
+                    _scrollablePanel.eventMouseWheel += (component, param) =>
+                    {
+                        _scrollablePanel.scrollPosition = new Vector2(0.0f,
+                            _scrollablePanel.scrollPosition.y + -param.wheelDelta*16.0f);
+                    };
+
+                    scrollBar.eventValueChanged += delegate(UIComponent component, float value)
+                    {
+                        _scrollablePanel.scrollPosition = new Vector2(0.0f, value);
+                    };
+
+                    _scrollablePanel.eventMouseDown += (component, param) =>
+                    {
+                        if (Input.GetKey(KeyCode.LeftControl))
+                        {
+                            moving = true;
+                            moveHandle = Input.mousePosition;
+                        }
+                    };
+
+                Debug.Log("setting up mouse up");
+                    _scrollablePanel.eventMouseUp += (component, param) =>
+                    {
+                        moving = false;
+                        moveHandle = Vector2.zero;
+                        SaveConfig();
+                    };
+                }
+
+            Debug.Log("setting up scroll panel size");
+                _scrollablePanel.size = new Vector2(this.size.x - 32.0f, config.panelSize.y - 2.0f);
+                if (itemCount == 0)
+                {return;}
+                float x = 0.0f;
+                float y = 0.0f;
+                float width = _scrollablePanel.transform.GetChild(0).GetComponent<UIButton>().size.x;
+                float height = _scrollablePanel.transform.GetChild(0).GetComponent<UIButton>().size.y;
+            Debug.Log("Checking child count shit");
+            UIButtons("RoadsSmallPanel");
+                for (int i = 0; i < _scrollablePanel.transform.childCount; i++)
+                {
+                    Debug.Log(string.Format("child count is {0}", _scrollablePanel.transform.childCount));
+                    Debug.Log("looping through child couts");
+                    
+                    var child = _scrollablePanel.transform.GetChild(i).GetComponent<UIButton>();
+                    Debug.Log("no child error");
+                    Debug.Log(string.Format("child buttonis {0}", child));
+                    child.relativePosition = new Vector3(x, y, 0.0f);
+                    Debug.Log("no relative positon of child error");
+                    x += width;
+                    Debug.Log("set the x to the width thing");
+                    
+                    if (x >= _scrollablePanel.width - width)
+                    {
+                        Debug.Log("doing some other goddamn if statement");
+                        
+                        x = 0.0f;
+                        Debug.Log("setting up y");
+                        y += height;
+                    }
+                }
+            Debug.Log("Where is the goddamn error");
         }
+
 
         public override void OnDestroy()
         {
@@ -199,17 +321,21 @@ namespace EnhancedBuildPanel.GUI_2
         {
             Debug.Log(string.Format("PanelName that was sent was {0}", PanelName));
             var panelName = PanelName;
+            Debug.Log("1");
             var panels = GameObject.Find(panelName);
+            Debug.Log(string.Format("panelName set to {0}", panelName));
             var buttonList = new List<UIButton>();
-
+            Debug.Log("2");
             var scrollablePanel = panels.GetComponentInChildren<UIScrollablePanel>();
+            Debug.Log("get components in scroll panel");
             if (scrollablePanel == null)
             {
                 Debug.Log(string.Format("GetPanelButtons did not find a scrollable panel for panel : {0}", panelName));
                 return buttonList;
             }
-
+            Debug.Log("3");
             var panelButtons = scrollablePanel.GetComponentsInChildren<UIButton>(true);
+            Debug.Log("4");
             if (panelButtons == null)
             {
                 Debug.Log(string.Format("GetPanelButtons did not find any buttons to use in panel : {0}", panelName));
@@ -248,11 +374,12 @@ namespace EnhancedBuildPanel.GUI_2
                     Debug.Log("Adding to Panel");
                     //cloneButton = AddUIComponent<UIButton>();
                     Debug.Log(string.Format("scrollable panel name is {0}", _scrollablePanel));
+                    Debug.Log(string.Format("clonebutton is {0}",cloneButton));
                     cloneButton.transform.parent = _scrollablePanel.transform;
                     //cloneButton = AddUIComponent<UIButton>();
                     //cloneButton.transform.parent = transform;
 
-                    Debug.Log(string.Format("Cloned button {0} to button {1}  and attached it to {3}!", button,cloneButton,cloneButton.parent));
+                    Debug.Log(string.Format("Cloned button {0} to button {1}  and attached it to {2}!", button,cloneButton,cloneButton.parent));
 
 
 
@@ -305,21 +432,24 @@ namespace EnhancedBuildPanel.GUI_2
 
         private void SetupControls()
         {
-          //_scrollablePanel = AddUIComponent<UIScrollablePanel>();
-            
+          _scrollablePanel = AddUIComponent<UIScrollablePanel>();
+            Debug.Log("seting up roads icons");
+          UIButtons("RoadsLargePanel");
             _title = AddUIComponent<UITitleBar>();
             _title.iconSprite = "IconAssetBuilding";
             _title.title = "Enhanced Build Panel" + EnhancedBuildPanel.Version;
             var offset = 40f;
-            UIButtons("RoadsSmallPanel");
+    
 
 
+            UpdatePanel(this);
 
-             UIButtons("RoadsMediumPanel");
-             UIButtons("RoadsLargePanel");
+            
+             //UIButtons("RoadsLargePanel");
+
             // UIButtons("RoadsHighwayPanel");
             // UIButtons("RoadsIntersectionPanel");
-            //UIButtons("ElectricityDefaultPanel");
+            UIButtons("RoadsSmallPanel");
             //UIGetButtons.UIButtons("WaterAndSewagePanel");
         }
 
