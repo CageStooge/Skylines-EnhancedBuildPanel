@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace EnhancedBuildPanel
 {
+    /*
     public class MeshData : IComparable
     {
         public enum Sorting
         {
             Name = 0,
-            Category,
             Triangles,
             LodTriangles,
             Weight,
@@ -20,11 +20,10 @@ namespace EnhancedBuildPanel
 
         public static Sorting sorting = Sorting.Name;
         public static bool ascendingSort = true;
-        private PrefabInfo _prefab;
-        public string category;
         public Vector2 lodTextureSize;
         public int lodTriangles;
         public float lodWeight;
+        private PrefabInfo m_prefab;
         public string name;
         public string steamID;
         public Vector2 textureSize;
@@ -33,23 +32,25 @@ namespace EnhancedBuildPanel
 
         public MeshData(PrefabInfo prefab)
         {
-            Prefab = prefab;
+            this.prefab = prefab;
         }
 
-        public PrefabInfo Prefab
+        public PrefabInfo prefab
         {
-            get { return _prefab; }
+            get { return m_prefab; }
             set
             {
-                if (_prefab != value)
+                if (m_prefab != value)
                 {
-                    _prefab = value;
-                    name = GetLocalizedName(_prefab);
-                    textureSize = GetTextureSize(_prefab);
-                    lodTextureSize = GetLodTextureSize(_prefab);
-                    GetTriangleInfo(_prefab, out triangles, out lodTriangles, out weight, out lodWeight);
-                    category = GetCategory(_prefab);
-                    steamID = GetSteamID(_prefab);
+                    m_prefab = value;
+
+                    name = GetLocalizedName(m_prefab);
+                    textureSize = GetTextureSize(m_prefab);
+                    lodTextureSize = GetLodTextureSize(m_prefab);
+
+                    GetTriangleInfo(m_prefab, out triangles, out lodTriangles, out weight, out lodWeight);
+
+                    steamID = GetSteamID(m_prefab);
                 }
             }
         }
@@ -72,7 +73,6 @@ namespace EnhancedBuildPanel
 
             if (sorting == Sorting.Name)
                 return b.name.CompareTo(a.name);
-
             if (sorting == Sorting.Triangles)
                 return b.triangles - a.triangles;
             if (sorting == Sorting.LodTriangles)
@@ -87,12 +87,6 @@ namespace EnhancedBuildPanel
                 return (int) (b.lodTextureSize.x*b.lodTextureSize.y - a.lodTextureSize.x*a.lodTextureSize.y);
 
             return 0;
-        }
-
-        private static string GetCategory(PrefabInfo prefab)
-        {
-            var itemCaregory = prefab.category;
-            return itemCaregory;
         }
 
         private static string GetLocalizedName(PrefabInfo prefab)
@@ -215,4 +209,5 @@ namespace EnhancedBuildPanel
             return Vector2.zero;
         }
     }
+     */
 }
