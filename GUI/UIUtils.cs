@@ -1,7 +1,7 @@
 ﻿using ColossalFramework.UI;
 using UnityEngine;
 
-namespace EnhancedBuildPanel.UI
+namespace EnhancedBuildPanel.GUI_2
 {
     public class UIUtils
     {

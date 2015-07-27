@@ -1,18 +1,16 @@
 ﻿using ColossalFramework.Steamworks;
 using ColossalFramework.UI;
-using MeshInfo.GUI;
 using UnityEngine;
-
-namespace EnhancedBuildPanel.UI
+/*
+namespace EnhancedBuildPanel.GUI
 {
-    public class UIPrefabItem : UIPanel, IUIFastListRow
+    public class UIPrefabItem : UIPanel
     {
         private UIPanel m_background;
-        private UILabel m_category;
         private UILabel m_lodTextureSize;
         private UILabel m_lodTriangles;
         private UILabel m_lodWeight;
-        private MeshData m_meshData;
+        //private MeshData m_meshData;
         private UILabel m_name;
         private UITextField m_steamID;
         private UILabel m_textureSize;
@@ -39,19 +37,21 @@ namespace EnhancedBuildPanel.UI
         }
 
         public void Display(object prefab, bool isRowOdd)
+            
         {
+            
+            /*
             m_meshData = prefab as MeshData;
 
             if (m_meshData == null || m_name == null) return;
 
             m_name.text = m_meshData.name;
-            m_category.text = m_meshData.category;
-            // m_category.text = m_category.name;
-            //m_steamID.text = (m_meshData.steamID == null) ? "" : m_meshData.steamID;
-            // m_steamID.isVisible = (m_meshData.steamID != null);
 
-            // m_triangles.text = (m_meshData.triangles > 0) ? m_meshData.triangles.ToString("N0") : "-";
-            // m_lodTriangles.text = (m_meshData.lodTriangles > 0) ? m_meshData.lodTriangles.ToString("N0") : "-";
+            m_steamID.text = (m_meshData.steamID == null) ? "" : m_meshData.steamID;
+            m_steamID.isVisible = (m_meshData.steamID != null);
+
+            m_triangles.text = (m_meshData.triangles > 0) ? m_meshData.triangles.ToString("N0") : "-";
+            m_lodTriangles.text = (m_meshData.lodTriangles > 0) ? m_meshData.lodTriangles.ToString("N0") : "-";
 
             m_weight.text = (m_meshData.weight > 0) ? m_meshData.weight.ToString("N2") : "-";
             if (m_meshData.weight >= 200)
@@ -87,6 +87,7 @@ namespace EnhancedBuildPanel.UI
             }
             else
                 background.backgroundSprite = null;
+
         }
 
         public void Select(bool isRowOdd)
@@ -99,7 +100,7 @@ namespace EnhancedBuildPanel.UI
 
         public override void Start()
         {
-            base.Start();
+         //   base.Start();
 
             isVisible = true;
             canFocus = true;
@@ -165,14 +166,6 @@ namespace EnhancedBuildPanel.UI
             m_triangles.pivot = UIPivotPoint.MiddleCenter;
             m_triangles.relativePosition = m_lodTriangles.relativePosition - new Vector3(80f, 0f);
 
-            m_category = AddUIComponent<UILabel>();
-            m_category.textScale = 0.9f;
-            m_category.width = 80f;
-            m_category.height = height;
-            m_category.textAlignment = UIHorizontalAlignment.Center;
-            m_category.pivot = UIPivotPoint.MiddleCenter;
-            m_category.relativePosition = m_triangles.relativePosition - new Vector3(80f, 0f);
-
             m_steamID = UIUtils.CreateTextField(this);
             m_steamID.normalBgSprite = null;
             m_steamID.padding = new RectOffset(5, 5, 14, 14);
@@ -181,8 +174,8 @@ namespace EnhancedBuildPanel.UI
             m_steamID.textColor = new Color32(128, 128, 128, 255);
             m_steamID.selectionBackgroundColor = new Color32(0, 0, 0, 128);
             m_steamID.numericalOnly = true;
-            m_steamID.relativePosition = m_category.relativePosition - new Vector3(100f, 0f);
-
+            m_steamID.relativePosition = m_triangles.relativePosition - new Vector3(100f, 0f);
+            /*
             m_steamID.eventTextChanged += (c, t) =>
             {
                 if (m_meshData.name.Contains("."))
@@ -216,3 +209,4 @@ namespace EnhancedBuildPanel.UI
         }
     }
 }
+*/

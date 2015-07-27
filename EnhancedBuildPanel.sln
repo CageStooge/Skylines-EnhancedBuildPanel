@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnhancedBuildPanel", "Skylines-EnhancedBuildPanel\EnhancedBuildPanel.csproj", "{72B9C1A3-6231-444A-9976-E2989A914BAD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnhancedBuildPanel", "EnhancedBuildPanel.csproj", "{C323E306-D11E-48A7-9620-121E4ADC4765}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{72B9C1A3-6231-444A-9976-E2989A914BAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72B9C1A3-6231-444A-9976-E2989A914BAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72B9C1A3-6231-444A-9976-E2989A914BAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72B9C1A3-6231-444A-9976-E2989A914BAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C323E306-D11E-48A7-9620-121E4ADC4765}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C323E306-D11E-48A7-9620-121E4ADC4765}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C323E306-D11E-48A7-9620-121E4ADC4765}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C323E306-D11E-48A7-9620-121E4ADC4765}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
